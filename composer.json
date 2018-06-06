@@ -1,0 +1,28 @@
+{
+    "name": "synergitech/laravel-postal",
+    "description": "This library integrates Postal with the standard Laravel 5 mail framework.",
+    "keywords": [
+        "Laravel",
+        "Postal",
+        "Email"
+    ],
+    "homepage": "https://github.com/synergitech/laravel-postal",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+        "laravel/framework": ">=5.5.0",
+        "postal/postal": "1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SynergiTech\\Postal\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SynergiTech\\Postal\\PostalServiceProvider"
+            ]
+        }
+    }
+}
