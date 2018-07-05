@@ -89,7 +89,7 @@ class PostalTransport extends Transport
         try {
             $response = $this->message->send();
         } catch (Error $error) {
-            throw new \BadMethodCallException($error->getMessage());
+            throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
         }
 
         $message->postal = $response;
