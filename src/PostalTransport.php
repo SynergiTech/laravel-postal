@@ -31,7 +31,7 @@ class PostalTransport extends Transport
 
         $recipients = [];
         foreach (['to', 'cc', 'bcc'] as $type) {
-            foreach ($message->{'get' . ucwords($type)}() as $email => $name) {
+            foreach ((array) $message->{'get' . ucwords($type)}() as $email => $name) {
                 if (!in_array($email, $recipients)) {
                     $recipients[] = $email;
                     $this->message->{$type}($name != null ? ($name . ' <' . $email . '>') : $email);
@@ -89,13 +89,7 @@ class PostalTransport extends Transport
         try {
             $response = $this->message->send();
         } catch (Error $error) {
-            if (strpos($error->getMessage(), '[NoRecipients]') !== false) {
-                throw new \BadMethodCallException('There are no recipients defined to received this message');
-            } elseif (strpos($error->getMessage(), '[InvalidServerAPIKey]') !== false) {
-                throw new \BadMethodCallException('The Postal key provided was not valid.');
-            }
-
-            return false;
+            throw new \BadMethodCallException($error->getMessage());
         }
 
         $message->postal = $response;
