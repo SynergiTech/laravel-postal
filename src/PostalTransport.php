@@ -31,10 +31,12 @@ class PostalTransport extends Transport
 
         $recipients = [];
         foreach (['to', 'cc', 'bcc'] as $type) {
-            foreach ($message->{'get' . ucwords($type)}() as $email => $name) {
-                if (!in_array($email, $recipients)) {
-                    $recipients[] = $email;
-                    $this->message->{$type}($name != null ? ($name . ' <' . $email . '>') : $email);
+            if ($data = $message->{'get' . ucwords($type)}()) {
+                foreach ($data as $email => $name) {
+                    if (!in_array($email, $recipients)) {
+                        $recipients[] = $email;
+                        $this->message->{$type}($name != null ? ($name . ' <' . $email . '>') : $email);
+                    }
                 }
             }
         }
