@@ -5,8 +5,6 @@ namespace SynergiTech\Postal;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Mail\TransportManager;
 
-use SynergiTech\Postal\PostalTransport;
-
 class PostalServiceProvider extends ServiceProvider
 {
     public function register()
