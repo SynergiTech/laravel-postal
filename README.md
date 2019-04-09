@@ -2,6 +2,8 @@
 
 This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
 
+**Please note** version 2 is configured differently and includes much more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
+
 ## Install
 
 First, install the package using Composer:
