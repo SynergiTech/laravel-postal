@@ -12,12 +12,19 @@ class PostalServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $configPath = __DIR__ . '/../config/postal.php';
+        $basePath = __DIR__ . '/../';
+        $configPath = $basePath . 'config/postal.php';
 
         // publish config
         $this->publishes([
             $configPath => config_path('postal.php'),
         ], 'config');
+
+        // publish migrations
+        $this->publishes([
+            $basePath . 'migrations/email.php' => database_path(sprintf('%s_create_email_table.php', date('Y_m_d_His'))),
+            $basePath . 'migrations/webhook.php' => database_path(sprintf('%s_create_webhook_table.php', date('Y_m_d_His'))),
+        ], 'migrations');
 
         // include the config file from the package if it isn't published
         $this->mergeConfigFrom($configPath, 'postal');
