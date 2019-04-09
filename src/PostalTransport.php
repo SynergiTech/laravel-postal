@@ -32,14 +32,6 @@ class PostalTransport extends Transport
      */
     public function send(Swift_Mime_SimpleMessage $swiftmessage, &$failedRecipients = null)
     {
-        // officially, you're supposed to have an eventDispatcher created in the construct, we aren't doing that for some reason
-        // if ($event = $this->eventDispatcher->createSendEvent($this, $swiftmessage)) {
-        //     $this->eventDispatcher->dispatchEvent($event, 'beforeSendPerformed');
-        //     if ($event->bubbleCancelled()) {
-        //         return 0;
-        //     }
-        // }
-
         $postalmessage = $this->swiftToPostal($swiftmessage);
 
         try {
