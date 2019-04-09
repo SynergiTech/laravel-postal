@@ -19,6 +19,13 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
+Also make sure you have filled out who the email comes from and that the domain you use is authorised by the API credential.
+
+```
+MAIL_FROM_ADDRESS=noreply@your.company
+MAIL_FROM_NAME="Your Company"
+```
+
 Finally, add the Postal service to `config/services.php`:
 
 ```php
