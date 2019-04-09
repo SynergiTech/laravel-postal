@@ -17,9 +17,9 @@ class PostalTransport extends Transport
 {
     protected $client;
 
-    public function __construct($domain, $key)
+    public function __construct(array $config)
     {
-        $this->client = new Client($domain, $key);
+        $this->client = new Client($config['domain'] ?? null, $config['key'] ?? null);
     }
 
     /**

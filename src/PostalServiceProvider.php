@@ -7,6 +7,25 @@ use Illuminate\Mail\TransportManager;
 
 class PostalServiceProvider extends ServiceProvider
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function boot()
+    {
+        $configPath = __DIR__ . '/../config/postal.php';
+
+        // publish config
+        $this->publishes([
+            $configPath => config_path('postal.php'),
+        ], 'config');
+
+        // include the config file from the package if it isn't published
+        $this->mergeConfigFrom($configPath, 'postal');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function register()
     {
         $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) {
@@ -17,8 +36,8 @@ class PostalServiceProvider extends ServiceProvider
     public function extendTransportManager(TransportManager $manager)
     {
         $manager->extend('postal', function () {
-            $config = $this->app['config']->get('services.postal', []);
-            return new PostalTransport($config['domain'], $config['key']);
+            $config = $this->app['config']->get('postal', []);
+            return new PostalTransport($config);
         });
     }
 }
