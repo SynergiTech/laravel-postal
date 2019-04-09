@@ -12,88 +12,119 @@ use Swift_Attachment;
 use Swift_Image;
 use Swift_MimePart;
 use Swift_Mime_SimpleMessage;
-use Swift_Events_SendEvent;
 
 class PostalTransport extends Transport
 {
     protected $client;
-    protected $message;
 
     public function __construct($domain, $key)
     {
         $this->client = new Client($domain, $key);
-        $this->message = new SendMessage($this->client);
     }
 
-    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
+    /**
+     * Inheritdoc from Swift_Transport
+     *
+     * @param Swift_Mime_SimpleMessage $message
+     * @param string[]                 $failedRecipients An array of failures by-reference
+     *
+     * @return int the number of sent messages? not sure
+     */
+    public function send(Swift_Mime_SimpleMessage $swiftmessage, &$failedRecipients = null)
     {
-        $this->beforeSendPerformed($message);
+        // officially, you're supposed to have an eventDispatcher created in the construct, we aren't doing that for some reason
+        // if ($event = $this->eventDispatcher->createSendEvent($this, $swiftmessage)) {
+        //     $this->eventDispatcher->dispatchEvent($event, 'beforeSendPerformed');
+        //     if ($event->bubbleCancelled()) {
+        //         return 0;
+        //     }
+        // }
+
+        $postalmessage = $this->swiftToPostal($swiftmessage);
+
+        try {
+            $response = $postalmessage->send();
+        } catch (Error $error) {
+            throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
+        }
+
+        // return postals response to Laravel
+        $swiftmessage->postal = $response;
+
+        // referencing Swift_Transport_SendmailTransport, this seems to be what is required
+        // I don't believe this value is used in Laravel
+        $count = count($postalmessage->attributes['to']) + count($postalmessage->attributes['cc']) + count($postalmessage->attributes['bcc']);
+        return $count;
+    }
+
+    /**
+     * Convert Swift message into a Postal sendmessage
+     *
+     * @param Swift_Mime_SimpleMessage $message
+     *
+     * @return SendMessage the converted message
+     */
+    private function swiftToPostal(Swift_Mime_SimpleMessage $swiftmessage) : SendMessage
+    {
+        // SendMessage cannot be reset so must be instantiated for each use
+        $postalmessage = new SendMessage($this->client);
 
         $recipients = [];
         foreach (['to', 'cc', 'bcc'] as $type) {
-            foreach ((array) $message->{'get' . ucwords($type)}() as $email => $name) {
-                if (!in_array($email, $recipients)) {
+            foreach ((array) $swiftmessage->{'get' . ucwords($type)}() as $email => $name) {
+                // dedup recipients
+                if (! in_array($email, $recipients)) {
                     $recipients[] = $email;
-                    $this->message->{$type}($name != null ? ($name . ' <' . $email . '>') : $email);
+                    $postalmessage->{$type}($name != null ? ($name . ' <' . $email . '>') : $email);
                 }
             }
         }
 
-        if ($message->getFrom()) {
-            foreach ($message->getFrom() as $email => $name) {
-                $this->message->from($name != null ? ($name . ' <' . $email . '>') : $email);
+        if ($swiftmessage->getFrom()) {
+            foreach ($swiftmessage->getFrom() as $email => $name) {
+                $postalmessage->from($name != null ? ($name . ' <' . $email . '>') : $email);
             }
         }
 
-        if ($message->getReplyTo()) {
-            foreach ($message->getReplyTo() as $email => $name) {
-                $this->message->replyTo($name != null ? ($name . ' <' . $email . '>') : $email);
+        if ($swiftmessage->getReplyTo()) {
+            foreach ($swiftmessage->getReplyTo() as $email => $name) {
+                $postalmessage->replyTo($name != null ? ($name . ' <' . $email . '>') : $email);
             }
         }
 
-        if ($message->getSubject()) {
-            $this->message->subject($message->getSubject());
+        if ($swiftmessage->getSubject()) {
+            $postalmessage->subject($swiftmessage->getSubject());
         }
 
-        if ($message->getContentType() == 'text/plain') {
-            $this->message->plainBody($message->getBody());
-        } elseif ($message->getContentType() == 'text/html') {
-            $this->message->htmlBody($message->getBody());
+        if ($swiftmessage->getContentType() == 'text/plain') {
+            $postalmessage->plainBody($swiftmessage->getBody());
+        } elseif ($swiftmessage->getContentType() == 'text/html') {
+            $postalmessage->htmlBody($swiftmessage->getBody());
         } else {
-            foreach ($message->getChildren() as $child) {
-                if ($child instanceof Swift_MimePart && $child->getContentType() === 'text/plain') {
-                    $this->message->plainBody($child->getBody());
+            foreach ($swiftmessage->getChildren() as $child) {
+                if ($child instanceof Swift_MimePart && $child->getContentType() == 'text/plain') {
+                    $postalmessage->plainBody($child->getBody());
                 }
             }
-            $this->message->htmlBody($message->getBody());
+            $postalmessage->htmlBody($swiftmessage->getBody());
         }
 
-        foreach ($message->getChildren() as $attachment) {
+        foreach ($swiftmessage->getChildren() as $attachment) {
             if ($attachment instanceof Swift_Attachment) {
-                $this->message->attach(
+                $postalmessage->attach(
                     $attachment->getFilename(),
                     $attachment->getContentType(),
                     $attachment->getBody()
                 );
             } elseif ($attachment instanceof Swift_Image) {
-                $this->message->attach(
+                $postalmessage->attach(
                     $attachment->getId(),
                     $attachment->getContentType(),
                     $attachment->getBody()
                 );
-            } else {
-                continue;
             }
         }
 
-        try {
-            $response = $this->message->send();
-        } catch (Error $error) {
-            throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
-        }
-
-        $message->postal = $response;
-
-        return $response;
+        return $postalmessage;
     }
 }
