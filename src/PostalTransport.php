@@ -150,7 +150,7 @@ class PostalTransport extends Transport
 
         $ids = array();
 
-        foreach ($response->result->messages as $address => $message) {
+        foreach ($response->recipients() as $address => $message) {
             $email = new $this->config['models']['email'];
 
             $email->to_email = $address;
@@ -163,8 +163,8 @@ class PostalTransport extends Transport
 
             $email->body = $swiftmessage->getBody();
 
-            $email->postal_id = $response->result->message_id;
-            $email->postal_token = $message->token;
+            $email->postal_id = $message->id();
+            $email->postal_token = $message->token();
 
             $email->save();
 
