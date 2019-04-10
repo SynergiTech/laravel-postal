@@ -1,5 +1,7 @@
 <?php
 
+use \SynergiTech\Postal\Models\Email;
+
 /**
  * Configuration options for synergitech/laravel-postal
  */
@@ -10,4 +12,8 @@ return [
     // this is an API credential in the same mail server
     // as the domain you wish to send from
     'key' => env('POSTAL_KEY'),
+
+    'models' => [
+        'email' => Email::class,
+    ],
 ];

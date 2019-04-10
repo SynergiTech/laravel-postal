@@ -7,6 +7,7 @@ use Illuminate\Mail\Transport\Transport;
 use Postal\SendMessage;
 use Postal\Client;
 use Postal\Error;
+use Postal\SendResult;
 
 use Swift_Attachment;
 use Swift_Image;
@@ -16,10 +17,12 @@ use Swift_Mime_SimpleMessage;
 class PostalTransport extends Transport
 {
     protected $client;
+    protected $config;
 
     public function __construct(array $config)
     {
         $this->client = new Client($config['domain'] ?? null, $config['key'] ?? null);
+        $this->config = $config;
     }
 
     /**
@@ -39,6 +42,8 @@ class PostalTransport extends Transport
         } catch (Error $error) {
             throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
         }
+
+        $newemailids = $this->recordEmailsFromResponse($swiftmessage, $response);
 
         // return postals response to Laravel
         $swiftmessage->postal = $response;
@@ -118,5 +123,54 @@ class PostalTransport extends Transport
         }
 
         return $postalmessage;
+    }
+
+    /**
+     * Preserve emails within database for later accounting with webhooks
+     *
+     * @param Swift_Mime_SimpleMessage $swiftmessage
+     * @param SendResult $response
+     *
+     * @return array a list of emails IDs that were saved in the database
+     */
+    public function recordEmailsFromResponse(Swift_Mime_SimpleMessage $swiftmessage, SendResult $response) : array
+    {
+        $recipients = array();
+
+        foreach (array('to', 'cc', 'bcc') as $field) {
+            $headers = $swiftmessage->getHeaders()->get($field);
+
+            // headers will be null if there is no CC for example
+            if ($headers !== null) {
+                $recipients = array_merge($recipients, $headers->getNameAddresses());
+            }
+        }
+
+        $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
+
+        $ids = array();
+
+        foreach ($response->result->messages as $address => $message) {
+            $email = new $this->config['models']['email'];
+
+            $email->to_email = $address;
+            $email->to_name = $recipients[$email->to_email];
+
+            $email->from_email = key($sender);
+            $email->from_name = $sender[$email->from_email];
+
+            $email->subject = $swiftmessage->getSubject();
+
+            $email->body = $swiftmessage->getBody();
+
+            $email->postal_id = $response->result->message_id;
+            $email->postal_token = $message->token;
+
+            $email->save();
+
+            $ids[] = $email->id;
+        }
+
+        return $ids;
     }
 }
