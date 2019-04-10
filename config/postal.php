@@ -1,6 +1,7 @@
 <?php
 
 use \SynergiTech\Postal\Models\Email;
+use \SynergiTech\Postal\Models\Email\Webhook;
 
 /**
  * Configuration options for synergitech/laravel-postal
@@ -15,5 +16,6 @@ return [
 
     'models' => [
         'email' => Email::class,
+        'webhook' => Webhook::class,
     ],
 ];
