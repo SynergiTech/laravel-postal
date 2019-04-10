@@ -25,7 +25,7 @@ class PostalTransport extends Transport
     /**
      * Inheritdoc from Swift_Transport
      *
-     * @param Swift_Mime_SimpleMessage $message
+     * @param Swift_Mime_SimpleMessage $swiftmessage
      * @param string[]                 $failedRecipients An array of failures by-reference
      *
      * @return int the number of sent messages? not sure
@@ -52,9 +52,9 @@ class PostalTransport extends Transport
     /**
      * Convert Swift message into a Postal sendmessage
      *
-     * @param Swift_Mime_SimpleMessage $message
+     * @param Swift_Mime_SimpleMessage $swiftmessage
      *
-     * @return SendMessage the converted message
+     * @return SendMessage the resulting sendmessage
      */
     private function swiftToPostal(Swift_Mime_SimpleMessage $swiftmessage) : SendMessage
     {
