@@ -18,4 +18,14 @@ return [
         'email' => Email::class,
         'webhook' => Webhook::class,
     ],
+
+    // enable features within this package
+    // - note that webhookreceiving requires emaillogging to actually do anything
+    'enable' => [
+        'emaillogging' => true,
+        'webhookreceiving' => true,
+    ],
+
+    // route to receive webhooks, configure to avoid collisions with the rest of your app
+    'webhookroute' => '/postal/webhook',
 ];

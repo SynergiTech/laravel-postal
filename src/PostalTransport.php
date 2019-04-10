@@ -43,7 +43,9 @@ class PostalTransport extends Transport
             throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
         }
 
-        $newemailids = $this->recordEmailsFromResponse($swiftmessage, $response);
+        if ($this->config['enable']['emaillogging'] === true) {
+            $newemailids = $this->recordEmailsFromResponse($swiftmessage, $response);
+        }
 
         // return postals response to Laravel
         $swiftmessage->postal = $response;
