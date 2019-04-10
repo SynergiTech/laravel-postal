@@ -2,7 +2,7 @@
 
 This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
 
-**Please note** version 2 is configured differently and includes much more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
+**Please note** version 2 is configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
 
 ## Install
 
@@ -56,4 +56,23 @@ class MessageSentListener
        }
     }
 }
+```
+
+### Send all email to one address (i.e. for development)
+
+Our [similar package for FuelPHP](https://github.com/SynergiTech/fuelphp-postal) allows you to send all messages to a specific email address defined in your environment. Laravel already has a mechanism for this and you can use it by updating the `config/mail.php` file as follows:
+
+```php
+$config = [
+    // existing config array
+];
+
+if (getenv('EMAIL')) {
+    $config['to'] = [
+        'address' => getenv('EMAIL'),
+        'name' => 'Your Name'
+    ];
+}
+
+return $config;
 ```
