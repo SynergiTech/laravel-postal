@@ -25,11 +25,16 @@ class CreateEmailsTable extends Migration
             $table->string('subject')->nullable();
             $table->longText('body')->nullable();
 
+            $table->string('postal_email_id');
             $table->integer('postal_id');
             $table->string('postal_token');
 
             $table->timestamp('created_at')->nullable();
 
+            // index for searching groups of emails
+            $table->index('postal_email_id');
+
+            // index for webhook searching
             $table->index(['postal_id', 'postal_token'], 'postal_id_token');
         });
     }

@@ -48,11 +48,11 @@ class PostalTransport extends Transport
         $this->sendPerformed($swiftmessage);
 
         if ($this->config['enable']['emaillogging'] === true) {
-            $newemailids = $this->recordEmailsFromResponse($swiftmessage, $response);
+            $this->recordEmailsFromResponse($swiftmessage, $response);
         }
 
-        // return postals response to Laravel
-        $swiftmessage->postal = $response;
+        // send known header back for laravel to match emails coming out of Postal
+        $swiftmessage->getHeaders()->addTextHeader('Message-ID', $response->result->message_id);
 
         return $this->numberOfRecipients($swiftmessage);
     }
@@ -134,7 +134,7 @@ class PostalTransport extends Transport
      * @param Swift_Mime_SimpleMessage $swiftmessage
      * @param SendResult $response
      *
-     * @return array a list of emails IDs that were saved in the database
+     * @return void
      */
     public function recordEmailsFromResponse(Swift_Mime_SimpleMessage $swiftmessage, SendResult $response) : array
     {
@@ -151,8 +151,6 @@ class PostalTransport extends Transport
 
         $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
 
-        $ids = array();
-
         foreach ($response->recipients() as $address => $message) {
             $email = new $this->config['models']['email'];
 
@@ -166,6 +164,7 @@ class PostalTransport extends Transport
 
             $email->body = $swiftmessage->getBody();
 
+            $email->postal_email_id = $response->result->message_id;
             $email->postal_id = $message->id();
             $email->postal_token = $message->token();
 
@@ -173,7 +172,5 @@ class PostalTransport extends Transport
 
             $ids[] = $email->id;
         }
-
-        return $ids;
     }
 }
