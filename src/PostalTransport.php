@@ -35,6 +35,8 @@ class PostalTransport extends Transport
      */
     public function send(Swift_Mime_SimpleMessage $swiftmessage, &$failedRecipients = null)
     {
+        $this->beforeSendPerformed($swiftmessage);
+
         $postalmessage = $this->swiftToPostal($swiftmessage);
 
         try {
@@ -42,6 +44,8 @@ class PostalTransport extends Transport
         } catch (Error $error) {
             throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
         }
+
+        $this->sendPerformed($swiftmessage);
 
         if ($this->config['enable']['emaillogging'] === true) {
             $newemailids = $this->recordEmailsFromResponse($swiftmessage, $response);
