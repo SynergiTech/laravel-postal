@@ -54,10 +54,7 @@ class PostalTransport extends Transport
         // return postals response to Laravel
         $swiftmessage->postal = $response;
 
-        // referencing Swift_Transport_SendmailTransport, this seems to be what is required
-        // I don't believe this value is used in Laravel
-        $count = count($postalmessage->attributes['to']) + count($postalmessage->attributes['cc']) + count($postalmessage->attributes['bcc']);
-        return $count;
+        return $this->numberOfRecipients($swiftmessage);
     }
 
     /**
