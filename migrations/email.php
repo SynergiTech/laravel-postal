@@ -29,6 +29,10 @@ class CreateEmailsTable extends Migration
             $table->integer('postal_id');
             $table->string('postal_token');
 
+            // must be nullable as morph is optional and
+            // if selected, added later
+            $table->nullableMorphs('emailable');
+
             $table->timestamp('created_at')->nullable();
 
             // index for searching groups of emails
