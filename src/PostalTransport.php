@@ -31,7 +31,7 @@ class PostalTransport extends Transport
      * @param Swift_Mime_SimpleMessage $swiftmessage
      * @param string[]                 $failedRecipients An array of failures by-reference
      *
-     * @return int the number of sent messages? not sure
+     * @return int the number of sent messages
      */
     public function send(Swift_Mime_SimpleMessage $swiftmessage, &$failedRecipients = null)
     {
@@ -136,7 +136,7 @@ class PostalTransport extends Transport
      *
      * @return void
      */
-    public function recordEmailsFromResponse(Swift_Mime_SimpleMessage $swiftmessage, SendResult $response) : array
+    public function recordEmailsFromResponse(Swift_Mime_SimpleMessage $swiftmessage, SendResult $response) : void
     {
         $recipients = array();
 
