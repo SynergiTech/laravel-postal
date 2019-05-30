@@ -17,12 +17,10 @@ use Swift_Mime_SimpleMessage;
 class PostalTransport extends Transport
 {
     protected $client;
-    protected $config;
 
-    public function __construct(array $config)
+    public function __construct(Client $client)
     {
-        $this->client = new Client($config['domain'] ?? null, $config['key'] ?? null);
-        $this->config = $config;
+        $this->client = $client;
     }
 
     /**
@@ -47,7 +45,7 @@ class PostalTransport extends Transport
 
         $this->sendPerformed($swiftmessage);
 
-        if ($this->config['enable']['emaillogging'] === true) {
+        if (config('postal.enable.emaillogging') === true) {
             $this->recordEmailsFromResponse($swiftmessage, $response);
         }
 
@@ -151,8 +149,9 @@ class PostalTransport extends Transport
 
         $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
 
+        $emailmodel = config('postal.models.email');
         foreach ($response->recipients() as $address => $message) {
-            $email = new $this->config['models']['email'];
+            $email = new $emailmodel;
 
             $email->to_email = $address;
             $email->to_name = $recipients[$email->to_email];
@@ -169,8 +168,6 @@ class PostalTransport extends Transport
             $email->postal_token = $message->token();
 
             $email->save();
-
-            $ids[] = $email->id;
         }
     }
 }
