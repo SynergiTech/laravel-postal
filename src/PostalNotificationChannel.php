@@ -6,7 +6,7 @@ use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 
-class PostalChannel extends MailChannel
+class PostalNotificationChannel extends MailChannel
 {
     /**
      * Send the given notification.

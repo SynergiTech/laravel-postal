@@ -58,6 +58,12 @@ class MessageSentListener
 }
 ```
 
+### Logging messages sent against notifiable models
+
+Create an `email` notification as you would normally but have `'SynergiTech\Postal\PostalNotificationChannel'` or `PostalNotificationChannel::class` returned in the `via()` method.
+
+You can still send messages through Postal as a driver if you just leave `'mail'` in the `via()` method but the channel from this package is responsible for creating the link.
+
 ### Send all email to one address (i.e. for development)
 
 Our [similar package for FuelPHP](https://github.com/SynergiTech/fuelphp-postal) allows you to send all messages to a specific email address defined in your environment. Laravel already has a mechanism for this and you can use it by updating the `config/mail.php` file as follows:
