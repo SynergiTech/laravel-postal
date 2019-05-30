@@ -4,6 +4,7 @@ namespace SynergiTech\Postal;
 
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Notification;
+use Illuminate\Database\Eloquent\Model;
 
 class PostalChannel extends MailChannel
 {
@@ -27,15 +28,6 @@ class PostalChannel extends MailChannel
             $this->messageBuilder($notifiable, $notification, $message)
         );
         // fin
-
-        // link the emails to the model that sent them
-        $emailmodel = config('postal.models.email');
-        \DB::table((new $emailmodel)->getTable())
-            ->where('postal_email_id', $message->getSwiftMessage()->getHeaders()->get('Message-ID')) // THIS DOESN'T WORK
-            ->update([
-                'emailable_type' => get_class($notifiable),
-                'emailable_id' => $notifiable->id,
-            ]);
     }
 
     /**
@@ -59,5 +51,26 @@ class PostalChannel extends MailChannel
                     ? [$email => (is_string($recipient) ? $recipient : $recipient->email)]
                     : [$email => $recipient];
         })->all();
+    }
+
+    /**
+     * Build the mail message.
+     *
+     * @param  \Illuminate\Mail\Message  $mailMessage
+     * @param  mixed  $notifiable
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @param  \Illuminate\Notifications\Messages\MailMessage  $message
+     * @return void
+     */
+    protected function buildMessage($mailMessage, $notifiable, $notification, $message)
+    {
+        parent::buildMessage($mailMessage, $notifiable, $notification, $message);
+
+        $model = $notification->logEmailAgainstModel();
+        if ($model instanceof Model) {
+            $headers = $mailMessage->getSwiftMessage()->getHeaders();
+            $headers->addTextHeader('notifiable_class', get_class($model));
+            $headers->addTextHeader('notifiable_id', $model->id);
+        }
     }
 }

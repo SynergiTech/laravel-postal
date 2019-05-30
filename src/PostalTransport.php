@@ -45,12 +45,27 @@ class PostalTransport extends Transport
 
         $this->sendPerformed($swiftmessage);
 
-        if (config('postal.enable.emaillogging') === true) {
-            $this->recordEmailsFromResponse($swiftmessage, $response);
-        }
+        $headers = $swiftmessage->getHeaders();
 
         // send known header back for laravel to match emails coming out of Postal
-        $swiftmessage->getHeaders()->addTextHeader('Message-ID', $response->result->message_id);
+        $headers->addTextHeader('Message-ID', $response->result->message_id);
+
+        if (config('postal.enable.emaillogging') === true) {
+            function getHeaderValue($header)
+            {
+                // trim definitely required
+                return trim(explode(': ', $header)[1]);
+            }
+
+            $this->recordEmailsFromResponse($swiftmessage, $response);
+            $emailmodel = config('postal.models.email');
+            \DB::table((new $emailmodel)->getTable())
+                ->where('postal_email_id', $response->result->message_id)
+                ->update([
+                    'emailable_type' => getHeaderValue($headers->get('notifiable_class')),
+                    'emailable_id' => getHeaderValue($headers->get('notifiable_id')),
+                ]);
+        }
 
         return $this->numberOfRecipients($swiftmessage);
     }
