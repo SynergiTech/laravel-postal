@@ -64,6 +64,8 @@ Create an `email` notification as you would normally but have `'SynergiTech\Post
 
 You can still send messages through Postal as a driver if you just leave `'mail'` in the `via()` method but the channel from this package is responsible for creating the link.
 
+**Please note** that Postals PHP client can throw exceptions if it fails to submit the message to the server (i.e. a permission problem occurred or an email address wasn't valid) so if you have a process which relies on sending an email, it would be advisable to send the notification before proceeding (i.e. saving the updated object to the database).
+
 ### Send all email to one address (i.e. for development)
 
 Our [similar package for FuelPHP](https://github.com/SynergiTech/fuelphp-postal) allows you to send all messages to a specific email address defined in your environment. Laravel already has a mechanism for this and you can use it by updating the `config/mail.php` file as follows:
