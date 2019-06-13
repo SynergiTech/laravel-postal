@@ -48,7 +48,8 @@ class PostalTransport extends Transport
         $headers = $swiftmessage->getHeaders();
 
         // send known header back for laravel to match emails coming out of Postal
-        $headers->addTextHeader('Message-ID', $response->result->message_id);
+        // - doesn't seem we can replace Message-ID
+        $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
 
         if (config('postal.enable.emaillogging') === true) {
             function getHeaderValue($header)
