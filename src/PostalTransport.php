@@ -53,18 +53,30 @@ class PostalTransport extends Transport
         if (config('postal.enable.emaillogging') === true) {
             function getHeaderValue($header)
             {
+                $value = explode(': ', $header);
+                if (count($value) == 1) {
+                    return '';
+                }
+
                 // trim definitely required
-                return trim(explode(': ', $header)[1]);
+                return trim($value[1]);
             }
 
             $this->recordEmailsFromResponse($swiftmessage, $response);
-            $emailmodel = config('postal.models.email');
-            \DB::table((new $emailmodel)->getTable())
-                ->where('postal_email_id', $response->result->message_id)
-                ->update([
-                    'emailable_type' => getHeaderValue($headers->get('notifiable_class')),
-                    'emailable_id' => getHeaderValue($headers->get('notifiable_id')),
-                ]);
+
+            $emailable_type = getHeaderValue($headers->get('notifiable_class'));
+            $emailable_id = getHeaderValue($headers->get('notifiable_id'));
+
+            // headers only set if using PostalNotificationChannel
+            if ($emailable_type != '' && $emailable_id != '') {
+                $emailmodel = config('postal.models.email');
+                \DB::table((new $emailmodel)->getTable())
+                    ->where('postal_email_id', $response->result->message_id)
+                    ->update([
+                        'emailable_type' => $emailable_type,
+                        'emailable_id' => $emailable_id,
+                    ]);
+            }
         }
 
         return $this->numberOfRecipients($swiftmessage);

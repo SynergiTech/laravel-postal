@@ -62,7 +62,7 @@ class MessageSentListener
 
 Create an `email` notification as you would normally but have `'SynergiTech\Postal\PostalNotificationChannel'` or `PostalNotificationChannel::class` returned in the `via()` method.
 
-You can still send messages through Postal as a driver if you just leave `'mail'` in the `via()` method but the channel from this package is responsible for creating the link.
+You can still send messages through Postal as a driver if you just leave `'mail'` in the `via()` method but the channel from this package is responsible for creating the link so if you do not use `PostalNotificationChannel` as mentioned above, there will not be a link between the messages and your notifiable model.
 
 **Please note** that Postals PHP client can throw exceptions if it fails to submit the message to the server (i.e. a permission problem occurred or an email address wasn't valid) so if you have a process which relies on sending an email, it would be advisable to send the notification before proceeding (i.e. saving the updated object to the database).
 
