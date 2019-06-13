@@ -66,11 +66,15 @@ class PostalNotificationChannel extends MailChannel
     {
         parent::buildMessage($mailMessage, $notifiable, $notification, $message);
 
-        $model = $notification->logEmailAgainstModel();
-        if ($model instanceof Model) {
-            $headers = $mailMessage->getSwiftMessage()->getHeaders();
-            $headers->addTextHeader('notifiable_class', get_class($model));
-            $headers->addTextHeader('notifiable_id', $model->id);
+        // the model that the notification is based on should be returned
+        // by a logEmailAgainstModel method in your notification
+        if (method_exists($notification, 'logEmailAgainstModel')) {
+            $model = $notification->logEmailAgainstModel();
+            if ($model instanceof Model) {
+                $headers = $mailMessage->getSwiftMessage()->getHeaders();
+                $headers->addTextHeader('notifiable_class', get_class($model));
+                $headers->addTextHeader('notifiable_id', $model->id);
+            }
         }
     }
 }
