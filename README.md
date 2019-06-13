@@ -83,8 +83,6 @@ Notification::route(PostalNotificationChannel::class, $to)
 ```
 
 ```php
-<?php
-
 namespace App\Notifications;
 
 use Illuminate\Notifications\Notification;
