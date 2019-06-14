@@ -52,7 +52,7 @@ class PostalTransport extends Transport
         $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
 
         if (config('postal.enable.emaillogging') === true) {
-            function getHeaderValue($header)
+            $getHeaderValue = function ($header)
             {
                 $value = explode(': ', $header);
                 if (count($value) == 1) {
@@ -61,12 +61,12 @@ class PostalTransport extends Transport
 
                 // trim definitely required
                 return trim($value[1]);
-            }
+            };
 
             $this->recordEmailsFromResponse($swiftmessage, $response);
 
-            $emailable_type = getHeaderValue($headers->get('notifiable_class'));
-            $emailable_id = getHeaderValue($headers->get('notifiable_id'));
+            $emailable_type = $getHeaderValue($headers->get('notifiable_class'));
+            $emailable_id = $getHeaderValue($headers->get('notifiable_id'));
 
             // headers only set if using PostalNotificationChannel
             if ($emailable_type != '' && $emailable_id != '') {
