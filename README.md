@@ -2,7 +2,7 @@
 
 This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
 
-**Please note** version 2 is configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
+**Please note** version 2 is backwards compatible with version 1 as long as you are not using a listener. Version 2 is also configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
 
 ## Install
 
@@ -32,36 +32,7 @@ MAIL_FROM_NAME="Your Company"
 
 ## Usage
 
-As this is a driver for the main Laravel Mail framework, sending emails is the same as usual - just follow the Laravel Mail documentation.
-
-The response returned by Postal is returned when you send an email, embedded as an object. This can also be accessed using the `Illuminate\Mail\Events\MessageSent` listener.
-
-```php
-namespace App\Listeners;
-
-use Illuminate\Mail\Events\MessageSent;
-
-class MessageSentListener
-{
-    /**
-     * Handle the event.
-     *
-     * @param MessageSent $event
-     * @return void
-     */
-    public function handle(MessageSent $event)
-    {
-        $headers = $event->message->getHeaders();
-        $postalmessageid = $headers->get('Postal-Message-ID');
-        $postalmessageid = explode(': ', $postalmessageid);
-        $postalmessageid = (count($postalmessageid) == 1) ? '' : trim($postalmessageid[1]);
-
-        if (strlen($postalmessageid) > 0) {
-            // do something here
-        }
-    }
-}
-```
+As this is a driver for the main Laravel Mail framework, sending emails is the same as usual - just follow the Laravel Mail documentation - however we recommend you make use of the `PostalNotificationChannel` class to enable full email tracking within your software.
 
 ### Logging messages sent against notifiable models
 
@@ -146,3 +117,36 @@ This package also provides the ability for you to record webhooks from Postal. T
 Each webhook payload should include a couple of unique values for some level of accuracy in your webhooks but if you want to verify the signature, you must provide the signing key from your Postal and enable this feature.
 
 You can access the signing public key by running `postal default-dkim-record` on your Postal server and copying the value of the `p` parameter (excluding the semicolon) to your environment under the key `POSTAL_WEBHOOK_PUBLIC_KEY`.
+
+## Listeners
+
+As with default Laravel, you can make use of the `Illuminate\Mail\Events\MessageSent` listener. In version 1, you received the whole response from Postal however in version 2 you will only receive a `Postal-Message-ID` and this is contained in the message header. This will allow you to access the emails created as this will be the value of the `postal_email_id` column.
+
+The change allows your code to meet static analysis requirements.
+
+```php
+namespace App\Listeners;
+
+use Illuminate\Mail\Events\MessageSent;
+
+class MessageSentListener
+{
+    /**
+     * Handle the event.
+     *
+     * @param MessageSent $event
+     * @return void
+     */
+    public function handle(MessageSent $event)
+    {
+        $headers = $event->message->getHeaders();
+        $postalmessageid = $headers->get('Postal-Message-ID');
+        $postalmessageid = explode(': ', $postalmessageid);
+        $postalmessageid = (count($postalmessageid) == 1) ? '' : trim($postalmessageid[1]);
+
+        if (strlen($postalmessageid) > 0) {
+            // do something here
+        }
+    }
+}
+```
