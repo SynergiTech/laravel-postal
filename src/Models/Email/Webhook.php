@@ -7,7 +7,9 @@ use SynergiTech\Postal\Models\Email;
 
 class Webhook extends Model
 {
-    public $timestamps = ['created_at']; // only enable created_at
+    const UPDATED_AT = null;
+
+    protected $table = 'email_webhooks';
 
     public function email()
     {
