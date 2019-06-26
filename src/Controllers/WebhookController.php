@@ -9,11 +9,26 @@ class WebhookController extends Controller
 {
     public function process(Request $request)
     {
-        // todo verify signature https://github.com/atech/postal/issues/432#issuecomment-353143578
-
         if ($request->input('payload.message') === null) {
             // todo remove link header
             return response('No payload', 400);
+        }
+
+        if (config('postal.webhook.verify') === true && strlen(config('postal.webhook.public_key')) > 0) {
+            $rsa_key_pem = "-----BEGIN PUBLIC KEY-----\r\n" .
+                chunk_split(config('postal.webhook.public_key'), 64) .
+                "-----END PUBLIC KEY-----\r\n";
+            $rsa_key = openssl_pkey_get_public($rsa_key_pem);
+
+            $signature = base64_decode($request->header('x-postal-signature'));
+
+            $body = $request->getContent();
+
+            $result = openssl_verify($body, $signature, $rsa_key, OPENSSL_ALGO_SHA1);
+
+            if ($result !== 1) {
+                return response('Unable to match signature header', 400);
+            }
         }
 
         $emailmodel = config('postal.models.email');
