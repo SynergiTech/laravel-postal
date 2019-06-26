@@ -146,5 +146,3 @@ This package also provides the ability for you to record webhooks from Postal. T
 Each webhook payload should include a couple of unique values for some level of accuracy in your webhooks but if you want to verify the signature, you must provide the signing key from your Postal and enable this feature.
 
 You can access the signing public key by running `postal default-dkim-record` on your Postal server and copying the value of the `p` parameter (excluding the semicolon) to your environment under the key `POSTAL_WEBHOOK_PUBLIC_KEY`.
-
-You should also provide `POSTAL_WEBHOOK_VERIFY` set to true.

@@ -30,7 +30,7 @@ return [
         // route to receive webhooks, configure to avoid collisions with the rest of your app
         'route' => env('POSTAL_WEBHOOK_ROUTE', '/postal/webhook'),
         // attempt to verify the X-Postal-Signature header
-        'verify' => env('POSTAL_WEBHOOK_VERIFY', false),
+        'verify' => env('POSTAL_WEBHOOK_VERIFY', true),
         // the public key, sourced from your servers DKIM record "p" value WITHOUT THE TRAILING SEMICOLON
         'public_key' => env('POSTAL_WEBHOOK_PUBLIC_KEY', ''),
     ],
