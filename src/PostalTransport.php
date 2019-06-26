@@ -7,6 +7,7 @@ use Illuminate\Mail\Transport\Transport;
 use Postal\SendMessage;
 use Postal\Client;
 use Postal\Error;
+use Postal\SendResult;
 
 use Swift_Attachment;
 use Swift_Image;
@@ -17,21 +18,23 @@ class PostalTransport extends Transport
 {
     protected $client;
 
-    public function __construct($domain, $key)
+    public function __construct(Client $client)
     {
-        $this->client = new Client($domain, $key);
+        $this->client = $client;
     }
 
     /**
      * Inheritdoc from Swift_Transport
      *
-     * @param Swift_Mime_SimpleMessage $message
+     * @param Swift_Mime_SimpleMessage $swiftmessage
      * @param string[]                 $failedRecipients An array of failures by-reference
      *
-     * @return int the number of sent messages? not sure
+     * @return int the number of sent messages
      */
     public function send(Swift_Mime_SimpleMessage $swiftmessage, &$failedRecipients = null)
     {
+        $this->beforeSendPerformed($swiftmessage);
+
         $postalmessage = $this->swiftToPostal($swiftmessage);
 
         try {
@@ -40,21 +43,52 @@ class PostalTransport extends Transport
             throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
         }
 
-        // return postals response to Laravel
-        $swiftmessage->postal = $response;
+        $this->sendPerformed($swiftmessage);
 
-        // referencing Swift_Transport_SendmailTransport, this seems to be what is required
-        // I don't believe this value is used in Laravel
-        $count = count($postalmessage->attributes['to']) + count($postalmessage->attributes['cc']) + count($postalmessage->attributes['bcc']);
-        return $count;
+        $headers = $swiftmessage->getHeaders();
+
+        // send known header back for laravel to match emails coming out of Postal
+        // - doesn't seem we can replace Message-ID
+        $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
+
+        if (config('postal.enable.emaillogging') === true) {
+            $getHeaderValue = function ($header)
+            {
+                $value = explode(': ', $header);
+                if (count($value) == 1) {
+                    return '';
+                }
+
+                // trim definitely required
+                return trim($value[1]);
+            };
+
+            $this->recordEmailsFromResponse($swiftmessage, $response);
+
+            $emailable_type = $getHeaderValue($headers->get('notifiable_class'));
+            $emailable_id = $getHeaderValue($headers->get('notifiable_id'));
+
+            // headers only set if using PostalNotificationChannel
+            if ($emailable_type != '' && $emailable_id != '') {
+                $emailmodel = config('postal.models.email');
+                \DB::table((new $emailmodel)->getTable())
+                    ->where('postal_email_id', $response->result->message_id)
+                    ->update([
+                        'emailable_type' => $emailable_type,
+                        'emailable_id' => $emailable_id,
+                    ]);
+            }
+        }
+
+        return $this->numberOfRecipients($swiftmessage);
     }
 
     /**
      * Convert Swift message into a Postal sendmessage
      *
-     * @param Swift_Mime_SimpleMessage $message
+     * @param Swift_Mime_SimpleMessage $swiftmessage
      *
-     * @return SendMessage the converted message
+     * @return SendMessage the resulting sendmessage
      */
     private function swiftToPostal(Swift_Mime_SimpleMessage $swiftmessage) : SendMessage
     {
@@ -118,5 +152,50 @@ class PostalTransport extends Transport
         }
 
         return $postalmessage;
+    }
+
+    /**
+     * Preserve emails within database for later accounting with webhooks
+     *
+     * @param Swift_Mime_SimpleMessage $swiftmessage
+     * @param SendResult $response
+     *
+     * @return void
+     */
+    public function recordEmailsFromResponse(Swift_Mime_SimpleMessage $swiftmessage, SendResult $response) : void
+    {
+        $recipients = array();
+
+        foreach (array('to', 'cc', 'bcc') as $field) {
+            $headers = $swiftmessage->getHeaders()->get($field);
+
+            // headers will be null if there is no CC for example
+            if ($headers !== null) {
+                $recipients = array_merge($recipients, $headers->getNameAddresses());
+            }
+        }
+
+        $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
+
+        $emailmodel = config('postal.models.email');
+        foreach ($response->recipients() as $address => $message) {
+            $email = new $emailmodel;
+
+            $email->to_email = $address;
+            $email->to_name = $recipients[$email->to_email];
+
+            $email->from_email = key($sender);
+            $email->from_name = $sender[$email->from_email];
+
+            $email->subject = $swiftmessage->getSubject();
+
+            $email->body = $swiftmessage->getBody();
+
+            $email->postal_email_id = $response->result->message_id;
+            $email->postal_id = $message->id();
+            $email->postal_token = $message->token();
+
+            $email->save();
+        }
     }
 }
