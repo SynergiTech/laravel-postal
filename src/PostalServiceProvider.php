@@ -31,7 +31,7 @@ class PostalServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($configPath, 'postal');
 
         if (config('postal.enable.webhookreceiving') === true) {
-            \Route::post(config('postal.webhookroute'), 'SynergiTech\Postal\Controllers\WebhookController@process');
+            \Route::post(config('postal.webhook.route'), 'SynergiTech\Postal\Controllers\WebhookController@process');
         }
     }
 

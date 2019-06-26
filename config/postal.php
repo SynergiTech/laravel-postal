@@ -15,17 +15,19 @@ return [
     'key' => env('POSTAL_KEY'),
 
     'models' => [
-        'email' => Email::class,
-        'webhook' => Webhook::class,
+        'email' => env('POSTAL_MODELS_EMAIL', Email::class),
+        'webhook' => env('POSTAL_MODELS_WEBHOOK', Webhook::class),
     ],
 
     // enable features within this package
     // - note that webhookreceiving requires emaillogging to actually do anything
     'enable' => [
-        'emaillogging' => true,
-        'webhookreceiving' => true,
+        'emaillogging' => env('POSTAL_ENABLE_EMAILLOG', true),
+        'webhookreceiving' => env('POSTAL_ENABLE_WEBHOOKRECEIVE', true),
     ],
 
-    // route to receive webhooks, configure to avoid collisions with the rest of your app
-    'webhookroute' => '/postal/webhook',
+    'webhook' => [
+        // route to receive webhooks, configure to avoid collisions with the rest of your app
+        'route' => env('POSTAL_WEBHOOK_ROUTE', '/postal/webhook'),
+    ],
 ];

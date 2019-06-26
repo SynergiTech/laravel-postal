@@ -21,7 +21,7 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
-If you want to alter the configuration, you can publish the file and update it as you desire.
+If you want to alter the configuration further, you can reference the `config/postal.php` file for the keys to place in your environment. Alternatively, you can publish the config file in the usual way if you wish to make specific changes.
 
 Also make sure you have filled out who the email comes from and that the domain you use is authorised by the API credential.
 
