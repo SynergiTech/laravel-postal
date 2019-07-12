@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Email extends Model
 {
-    public $timestamps = ['created_at']; // only enable created_at
+    const UPDATED_AT = null;
 
     public function webhooks()
     {
