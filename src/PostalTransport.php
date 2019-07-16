@@ -184,14 +184,24 @@ class PostalTransport extends Transport
             }
         }
 
+        // postals native libraries lowercase the email address but we still have the cased versions
+        // in the swift message so rearrange what we have to get the best data out
+        $formattedRecipients = array();
+        foreach ($recipients as $email => $name) {
+            $formattedRecipients[strtolower($email)] = array(
+                'email' => $email,
+                'name' => $name,
+            );
+        }
+
         $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
 
         $emailmodel = config('postal.models.email');
         foreach ($response->recipients() as $address => $message) {
             $email = new $emailmodel;
 
-            $email->to_email = $address;
-            $email->to_name = $recipients[$email->to_email];
+            $email->to_email = $formattedRecipients[$address]['email'];
+            $email->to_name = $formattedRecipients[$address]['name'];
 
             $email->from_email = key($sender);
             $email->from_name = $sender[$email->from_email];
