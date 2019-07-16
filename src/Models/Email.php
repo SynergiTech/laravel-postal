@@ -10,6 +10,6 @@ class Email extends Model
 
     public function webhooks()
     {
-        return $this->hasMany(Webhook::class);
+        return $this->hasMany(Email\Webhook::class);
     }
 }
