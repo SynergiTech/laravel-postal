@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmailWebhookTable extends Migration
+class CreatePostalEmailWebhookTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +13,10 @@ class CreateEmailWebhookTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('email_webhooks')) {
+            return;
+        }
+
         Schema::create('email_webhooks', function (Blueprint $table) {
             $table->bigIncrements('id');
 

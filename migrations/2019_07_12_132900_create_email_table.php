@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmailTable extends Migration
+class CreatePostalEmailTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +13,10 @@ class CreateEmailTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('emails')) {
+            return;
+        }
+
         Schema::create('emails', function (Blueprint $table) {
             $table->bigIncrements('id');
 
