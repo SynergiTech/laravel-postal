@@ -42,8 +42,7 @@ class PostalNotificationChannel extends MailChannel
     {
         // copy from mailchannel, update channel name to this class
         // - this is where the "to" addressee gets injected
-        $recipients = $notifiable->routeNotificationFor(self::class, $notification);
-        if (!is_array($recipients)) {
+        if (is_string($recipients = $notifiable->routeNotificationFor(self::class, $notification))) {
             $recipients = [$recipients];
         }
 
