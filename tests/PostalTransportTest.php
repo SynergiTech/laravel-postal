@@ -6,6 +6,9 @@ use Postal\Client;
 use Postal\Error;
 use Postal\SendResult;
 use SynergiTech\Postal\PostalTransport;
+use Illuminate\Mail\TransportManager;
+use SynergiTech\Postal\PostalNotificationChannel;
+use Illuminate\Support\Facades\Notification;
 
 class PostalTransportTest extends TestCase
 {
@@ -94,5 +97,36 @@ class PostalTransportTest extends TestCase
 
         $this->assertSame($swift->getBody(), $postal->attributes['html_body']);
         $this->assertSame('Body', $postal->attributes['plain_body']);
+    }
+
+    public function testPostalCaseSensitivity()
+    {
+        $result = new \stdClass;
+        $result->message_id = 'caseSensitivityTest';
+        $message = new \stdClass();
+        $message->id = 'caseSensitivityTest';
+        $message->token = 'caseSensitivityTest';
+        $result->messages['caseSensitivityTest@example.com'] = $message;
+
+        $clientMock = $this->createMock(Client::class);
+        $clientMock
+            ->method('makeRequest')
+            ->willReturn($result);
+
+        $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) use ($clientMock) {
+            $manager->extend('postal', function () use ($clientMock) {
+                $config = config('postal', []);
+                return new PostalTransport($clientMock);
+            });
+        });
+
+        $notifiable = new ExampleNotifiable();
+        Notification::route(PostalNotificationChannel::class, ['caseSensitivityTest@example.com'])
+            ->notify(new ExampleNotification($notifiable));
+
+        $emailModel = config('postal.models.email');
+        $email = $emailModel::where('to_email', 'caseSensitivityTest@example.com')->first();
+        $this->assertNotNull($email);
+        $this->assertSame('caseSensitivityTest@example.com', $email->to_email);
     }
 }

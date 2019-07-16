@@ -32,7 +32,7 @@ class FeatureTest extends TestCase
         });
 
         $notifiable = new ExampleNotifiable();
-        Notification::route(PostalNotificationChannel::class, $notifiable)
+        Notification::route(PostalNotificationChannel::class, [$notifiable])
             ->notify(new ExampleNotification($notifiable));
 
         $emailModel = config('postal.models.email');
