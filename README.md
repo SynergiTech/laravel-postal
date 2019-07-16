@@ -150,3 +150,16 @@ class MessageSentListener
     }
 }
 ```
+
+## Running tests
+To run the full suite of unit tests:
+```
+vendor/bin/phpunit -c phpunit.xml
+```
+You will need xdebug installed to generate code coverage.
+
+### Docker
+A sample Dockerfile is provided to setup an environment to run the tests without configuring your local machine. The Dockerfile can take a PHP version as an argument to test multiple versions.
+```
+docker build . --build-arg PHP_VERSION=7.3
+```
