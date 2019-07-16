@@ -52,8 +52,7 @@ class PostalTransport extends Transport
         $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
 
         if (config('postal.enable.emaillogging') === true) {
-            $getHeaderValue = function ($header)
-            {
+            $getHeaderValue = function ($header) {
                 $value = explode(': ', $header);
                 if (count($value) == 1) {
                     return '';
@@ -122,7 +121,7 @@ class PostalTransport extends Transport
             $postalmessage->subject($swiftmessage->getSubject());
         }
 
-        $scanParts = function($scanParts, $postalmessage, $part) {
+        $scanParts = function ($scanParts, $postalmessage, $part) {
             if ($part->getContentType() == 'text/plain') {
                 $postalmessage->plainBody($part->getBody());
             }
