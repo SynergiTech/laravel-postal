@@ -37,10 +37,15 @@ class PostalServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) {
-            $manager->extend('postal', function () {
-                $config = config('postal', []);
-                return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
-            });
+            $this->extendTransportManager($manager);
+        });
+    }
+
+    public function extendTransportManager(TransportManager $manager)
+    {
+        $manager->extend('postal', function () {
+            $config = config('postal', []);
+            return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
         });
     }
 }
