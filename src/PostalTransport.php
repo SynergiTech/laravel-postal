@@ -52,8 +52,7 @@ class PostalTransport extends Transport
         $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
 
         if (config('postal.enable.emaillogging') === true) {
-            $getHeaderValue = function ($header)
-            {
+            $getHeaderValue = function ($header) {
                 $value = explode(': ', $header);
                 if (count($value) == 1) {
                     return '';
@@ -90,10 +89,10 @@ class PostalTransport extends Transport
      *
      * @return SendMessage the resulting sendmessage
      */
-    private function swiftToPostal(Swift_Mime_SimpleMessage $swiftmessage) : SendMessage
+    public function swiftToPostal(Swift_Mime_SimpleMessage $swiftmessage) : SendMessage
     {
         // SendMessage cannot be reset so must be instantiated for each use
-        $postalmessage = new SendMessage($this->client);
+        $postalmessage = $this->getNewSendMessage();
 
         $recipients = [];
         foreach (['to', 'cc', 'bcc'] as $type) {
@@ -122,16 +121,25 @@ class PostalTransport extends Transport
             $postalmessage->subject($swiftmessage->getSubject());
         }
 
-        if ($swiftmessage->getContentType() == 'text/plain') {
-            $postalmessage->plainBody($swiftmessage->getBody());
-        } elseif ($swiftmessage->getContentType() == 'text/html') {
-            $postalmessage->htmlBody($swiftmessage->getBody());
-        } else {
-            foreach ($swiftmessage->getChildren() as $child) {
-                if ($child instanceof Swift_MimePart && $child->getContentType() == 'text/plain') {
-                    $postalmessage->plainBody($child->getBody());
-                }
+        $scanParts = function ($scanParts, $postalmessage, $part) {
+            if ($part->getContentType() == 'text/plain') {
+                $postalmessage->plainBody($part->getBody());
             }
+            if ($part->getContentType() == 'text/html') {
+                $postalmessage->htmlBody($part->getBody());
+            }
+            foreach ($part->getChildren() as $k => $child) {
+                $scanParts($scanParts, $postalmessage, $child);
+            }
+        };
+        $scanParts($scanParts, $postalmessage, $swiftmessage);
+        // quirk: as swift_message does not return all child parts in
+        // getChildren we must also make a very similar call to
+        // getBodyContentType to ensure we have added all potential body parts
+        if ($swiftmessage->getBodyContentType() == 'text/plain') {
+            $postalmessage->plainBody($swiftmessage->getBody());
+        }
+        if ($swiftmessage->getBodyContentType() == 'text/html') {
             $postalmessage->htmlBody($swiftmessage->getBody());
         }
 
@@ -175,14 +183,24 @@ class PostalTransport extends Transport
             }
         }
 
+        // postals native libraries lowercase the email address but we still have the cased versions
+        // in the swift message so rearrange what we have to get the best data out
+        $formattedRecipients = array();
+        foreach ($recipients as $email => $name) {
+            $formattedRecipients[strtolower($email)] = array(
+                'email' => $email,
+                'name' => $name,
+            );
+        }
+
         $sender = $swiftmessage->getHeaders()->get('from')->getNameAddresses();
 
         $emailmodel = config('postal.models.email');
         foreach ($response->recipients() as $address => $message) {
             $email = new $emailmodel;
 
-            $email->to_email = $address;
-            $email->to_name = $recipients[$email->to_email];
+            $email->to_email = $formattedRecipients[$address]['email'];
+            $email->to_name = $formattedRecipients[$address]['name'];
 
             $email->from_email = key($sender);
             $email->from_name = $sender[$email->from_email];
@@ -197,5 +215,10 @@ class PostalTransport extends Transport
 
             $email->save();
         }
+    }
+
+    public function getNewSendMessage()
+    {
+        return new SendMessage($this->client);
     }
 }

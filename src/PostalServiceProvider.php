@@ -21,11 +21,7 @@ class PostalServiceProvider extends ServiceProvider
             $configPath => config_path('postal.php'),
         ], 'config');
 
-        // publish migrations
-        $this->publishes([
-            $basePath . 'migrations/email.php' => database_path(sprintf('migrations/%s_create_email_table.php', date('Y_m_d_His'))),
-            $basePath . 'migrations/webhook.php' => database_path(sprintf('migrations/%s_create_email_webhook_table.php', date('Y_m_d_His'))),
-        ], 'migrations');
+        $this->loadMigrationsFrom($basePath . 'migrations');
 
         // include the config file from the package if it isn't published
         $this->mergeConfigFrom($configPath, 'postal');
@@ -41,10 +37,15 @@ class PostalServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) {
-            $manager->extend('postal', function () {
-                $config = config('postal', []);
-                return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
-            });
+            $this->extendTransportManager($manager);
+        });
+    }
+
+    public function extendTransportManager(TransportManager $manager)
+    {
+        $manager->extend('postal', function () {
+            $config = config('postal', []);
+            return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
         });
     }
 }

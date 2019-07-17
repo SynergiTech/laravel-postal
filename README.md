@@ -1,8 +1,8 @@
 # Laravel Postal
+[![Build Status](https://travis-ci.org/SynergiTech/laravel-postal.svg?branch=master)](https://travis-ci.org/SynergiTech/laravel-postal)
+[![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
 This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
-
-**Please note** version 2 is backwards compatible with version 1 as long as you are not using a listener. Version 2 is also configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
 
 ## Install
 
@@ -10,6 +10,10 @@ First, install the package using Composer:
 
 ```
 composer require synergitech/laravel-postal
+```
+Next, run the package migrations:
+```
+php artisan migrate
 ```
 
 Next, add your credentials to your `.env` and set your mail driver to `postal`:
@@ -21,7 +25,10 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
-If you want to alter the configuration further, you can reference the `config/postal.php` file for the keys to place in your environment. Alternatively, you can publish the config file in the usual way if you wish to make specific changes.
+If you want to alter the configuration further, you can reference the `config/postal.php` file for the keys to place in your environment. Alternatively, you can publish the config file in the usual way if you wish to make specific changes:
+```
+php artisan vendor:publish --provider="SynergiTech\Postal\PostalServiceProvider"
+```
 
 Also make sure you have filled out who the email comes from and that the domain you use is authorised by the API credential.
 
@@ -33,6 +40,15 @@ MAIL_FROM_NAME="Your Company"
 ## Usage
 
 As this is a driver for the main Laravel Mail framework, sending emails is the same as usual - just follow the Laravel Mail documentation - however we recommend you make use of the `PostalNotificationChannel` class to enable full email tracking within your software.
+
+## Upgrading
+### Upgrading from V1 to V2
+**Please note** version 2 is backwards compatible with version 1 as long as you are not using a listener. Version 2 is also configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
+
+### Upgrading between V2 and V2.1
+There are no backwards incompatible changes between these two versions unless you have customized the default table names. Prior to v2.1, we published our migration files into your application. Beginning in v2.1, we now present these to Laravel in our service provider.
+
+Our migrations will be run again when upgrading between these two versions. The migrations will not recreate the table or otherwise error when it detects the presence of the default tables. However, if they have been renamed, they will be created again. Simply create a new migration to drop the tables.
 
 ### Logging messages sent against notifiable models
 
@@ -149,4 +165,17 @@ class MessageSentListener
         }
     }
 }
+```
+
+## Running tests
+To run the full suite of unit tests:
+```
+vendor/bin/phpunit -c phpunit.xml
+```
+You will need xdebug installed to generate code coverage.
+
+### Docker
+A sample Dockerfile is provided to setup an environment to run the tests without configuring your local machine. The Dockerfile can take a PHP version as an argument to test multiple versions.
+```
+docker build . --build-arg PHP_VERSION=7.3
 ```
