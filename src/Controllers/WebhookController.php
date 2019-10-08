@@ -9,7 +9,7 @@ class WebhookController extends Controller
 {
     public function process(Request $request)
     {
-        if ($request->input('payload.message') === null) {
+        if ($request->input('payload') === null) {
             // todo remove link header
             return response('No payload', 400);
         }
@@ -37,17 +37,27 @@ class WebhookController extends Controller
         $emailmodel = new $emailmodel;
         $webhookmodel = new $webhookmodel;
 
-        $email = $emailmodel
-            ->where('postal_id', $request->input('payload.message.id'))
-            ->where('postal_token', $request->input('payload.message.token'))
-            ->first();
+        if ($request->input('payload.message') !== null) {
+            $postal_id = $request->input('payload.message.id');
+            $postal_token = $request->input('payload.message.token');
+        } elseif ($request->input('payload.original_message') !== null) {
+            $postal_id = $request->input('payload.original_message.id');
+            $postal_token = $request->input('payload.original_message.token');
+        }
 
-        // we aren't concerned about not matching an email, don't visibly error
-        if (is_object($email)) {
-            $webhookmodel->email_id = $email->id;
-            $webhookmodel->action = $request->input('event');
-            $webhookmodel->payload = json_encode($request->input('payload'));
-            $webhookmodel->save();
+        if (isset($postal_id) && isset($postal_token)) {
+            $email = $emailmodel
+                ->where('postal_id', $postal_id)
+                ->where('postal_token', $postal_token)
+                ->first();
+
+            // we aren't concerned about not matching an email, don't visibly error
+            if (is_object($email)) {
+                $webhookmodel->email_id = $email->id;
+                $webhookmodel->action = $request->input('event');
+                $webhookmodel->payload = json_encode($request->input('payload'));
+                $webhookmodel->save();
+            }
         }
 
         // todo remove link header

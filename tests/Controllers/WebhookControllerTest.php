@@ -64,6 +64,26 @@ class WebhookControllerTest extends TestCase
             'event' => 'unit.test',
         ];
 
+        $this->sendSuccessfulWebhook($input);
+    }
+
+    public function testBounceWebhookReceivedSuccessfully()
+    {
+        $input = [
+            'payload' => [
+                'original_message' => [
+                    'id' => 'a',
+                    'token' => 'a',
+                ],
+            ],
+            'event' => 'unit.test',
+        ];
+
+        $this->sendSuccessfulWebhook($input);
+    }
+
+    private function sendSuccessfulWebhook($input)
+    {
         $emailModel = config('postal.models.email');
         $email = new $emailModel();
         $email->to_email = 'example@example.org';
