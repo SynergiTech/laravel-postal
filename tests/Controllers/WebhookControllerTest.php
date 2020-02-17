@@ -57,18 +57,38 @@ class WebhookControllerTest extends TestCase
         $input = [
             'payload' => [
                 'message' => [
-                    'id' => 'a',
+                    'id' => 123,
                     'token' => 'a',
                 ],
             ],
             'event' => 'unit.test',
         ];
 
+        $this->sendSuccessfulWebhook($input);
+    }
+
+    public function testBounceWebhookReceivedSuccessfully()
+    {
+        $input = [
+            'payload' => [
+                'original_message' => [
+                    'id' => 123,
+                    'token' => 'a',
+                ],
+            ],
+            'event' => 'unit.test',
+        ];
+
+        $this->sendSuccessfulWebhook($input);
+    }
+
+    private function sendSuccessfulWebhook($input)
+    {
         $emailModel = config('postal.models.email');
         $email = new $emailModel();
         $email->to_email = 'example@example.org';
         $email->from_email = 'example@example.org';
-        $email->postal_id = 'a';
+        $email->postal_id = 123;
         $email->postal_email_id = 'a';
         $email->postal_token = 'a';
         $email->save();
@@ -86,6 +106,9 @@ class WebhookControllerTest extends TestCase
 
         $webhookModel = config('postal.models.webhook');
         $webhook = $webhookModel::where('email_id', $email->id)->first();
+
+        // detect whether the query was successful, i.e. the hardcoded IDs correspond
+        $this->assertInstanceOf($webhookModel, $webhook);
 
         $this->assertSame('unit.test', $webhook->action);
 
