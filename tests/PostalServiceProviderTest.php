@@ -14,7 +14,7 @@ class PostalServiceProviderTest extends TestCase
         $mailManager = new MailManager($this->app);
         $serviceProvider->extendMailManager($mailManager);
 
-        $driver = $mailManager->createTransport(['transport' => 'postal']);
+        $driver = $mailManager->createTransport(config('mail.mailers.postal'));
         $this->assertInstanceOf(PostalTransport::class, $driver);
     }
 }
