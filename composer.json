@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.1.0",
-        "laravel/framework": ">=5.6.0",
+        "laravel/framework": "^5.6 || ^6.0",
         "postal/postal": "1.0"
     },
     "require-dev": {
