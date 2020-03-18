@@ -2,7 +2,7 @@
 
 namespace SynergiTech\Postal\Tests;
 
-use Illuminate\Mail\TransportManager;
+use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Notification;
 use Postal\Client;
 use SynergiTech\Postal\PostalNotificationChannel;
@@ -24,9 +24,8 @@ class FeatureTest extends TestCase
             ->method('makeRequest')
             ->willReturn($result);
 
-        $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) use ($clientMock) {
+        $this->app->afterResolving(MailManager::class, function (MailManager $manager) use ($clientMock) {
             $manager->extend('postal', function () use ($clientMock) {
-                $config = config('postal', []);
                 return new PostalTransport($clientMock);
             });
         });

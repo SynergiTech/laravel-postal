@@ -9,11 +9,11 @@ class PostalNotificationChannelTest extends TestCase
 {
     public function testSend()
     {
-        $mailerMock = $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
-        $notifMock = $this->createMock(ExampleNotification::class);
+        $notifyMock = $this->createMock(ExampleNotification::class);
 
-        $notifMock
+        $notifyMock
             ->expects($this->once())
             ->method('toMail')
             ->with('test')
@@ -22,12 +22,12 @@ class PostalNotificationChannelTest extends TestCase
 
         $nc = new PostalNotificationChannel($mailerMock, $markdownMock);
 
-        $nc->send('test', $notifMock);
+        $nc->send('test', $notifyMock);
     }
 
     public function testGetRecipients()
     {
-        $mailerMock = $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
         $notificationMock = $this->createMock(ExampleNotification::class);
         $notifiableMock = $this->createMock(\Illuminate\Notifications\AnonymousNotifiable::class);
@@ -47,7 +47,7 @@ class PostalNotificationChannelTest extends TestCase
 
         $nc = new PostalNotificationChannel($mailerMock, $markdownMock);
 
-        $callProtectedFunction = function() use ($nc, $notifiableMock, $notificationMock) {
+        $callProtectedFunction = function () use ($nc, $notifiableMock, $notificationMock) {
             $class = new \ReflectionClass($nc);
             $method = $class->getMethod('getRecipients');
             $method->setAccessible(true);

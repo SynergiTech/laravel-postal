@@ -30,6 +30,7 @@ class TestCase extends OrchestraTestCase
         $app['config']->set('postal.webhook.public_key', $keyPair['public']);
         $app['config']->set('postal.webhook.verify', true);
         $app['config']->set('postal.webhook.route', '/postal/webhook');
+        $app['config']->set('mail.mailers.postal', ['transport' => 'postal']);
     }
 
     public function getEnvironmentSetUp($app)

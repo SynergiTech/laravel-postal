@@ -2,7 +2,9 @@
 [![Build Status](https://travis-ci.org/SynergiTech/laravel-postal.svg?branch=master)](https://travis-ci.org/SynergiTech/laravel-postal)
 [![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
-This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
+This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 7 mail framework.
+
+Notice: Need this package for Laravel between 5.8 and 6? Use version 2.
 
 ## Install
 
@@ -19,11 +21,21 @@ php artisan migrate
 Next, add your credentials to your `.env` and set your mail driver to `postal`:
 
 ```
-MAIL_DRIVER=postal
+MAIL_MAILER=postal
 
 POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
+
+Now we want to add postal as a mailer to our `config/mail.php` file
+```
+'mailers' => [
+    'postal' => [
+        'transport' => 'postal',
+    ],
+],
+```
+> Notice: Since Laravel 7 they use a new structure of config file which needs `MAIL_MAILER`.  
 
 If you want to alter the configuration further, you can reference the `config/postal.php` file for the keys to place in your environment. Alternatively, you can publish the config file in the usual way if you wish to make specific changes:
 ```

@@ -3,7 +3,7 @@
 namespace SynergiTech\Postal;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Mail\TransportManager;
+use Illuminate\Mail\MailManager;
 use Postal\Client;
 
 class PostalServiceProvider extends ServiceProvider
@@ -36,12 +36,12 @@ class PostalServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) {
-            $this->extendTransportManager($manager);
+        $this->app->afterResolving(MailManager::class, function (MailManager $manager) {
+            $this->extendMailManager($manager);
         });
     }
 
-    public function extendTransportManager(TransportManager $manager)
+    public function extendMailManager(MailManager $manager)
     {
         $manager->extend('postal', function () {
             $config = config('postal', []);
