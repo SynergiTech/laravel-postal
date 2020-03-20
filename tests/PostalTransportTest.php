@@ -6,7 +6,7 @@ use Postal\Client;
 use Postal\Error;
 use Postal\SendResult;
 use SynergiTech\Postal\PostalTransport;
-use Illuminate\Mail\TransportManager;
+use Illuminate\Mail\MailManager;
 use SynergiTech\Postal\PostalNotificationChannel;
 use Illuminate\Support\Facades\Notification;
 
@@ -56,8 +56,6 @@ class PostalTransportTest extends TestCase
     {
         $clientMock = $this->createMock(Client::class);
 
-        $swift = new \Swift_Message();
-
         $swift = (new \Swift_Message())
             ->setSubject('Subject')
             ->setFrom(['john@doe.com' => 'John Doe'])
@@ -85,8 +83,6 @@ class PostalTransportTest extends TestCase
     {
         $clientMock = $this->createMock(Client::class);
 
-        $swift = new \Swift_Message();
-
         $swift = (new \Swift_Message())
             ->addPart('Body', 'text/plain')
             ->setBody('<span>HTML Body</span>', 'text/html');
@@ -113,7 +109,7 @@ class PostalTransportTest extends TestCase
             ->method('makeRequest')
             ->willReturn($result);
 
-        $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) use ($clientMock) {
+        $this->app->afterResolving(MailManager::class, function (MailManager $manager) use ($clientMock) {
             $manager->extend('postal', function () use ($clientMock) {
                 $config = config('postal', []);
                 return new PostalTransport($clientMock);
