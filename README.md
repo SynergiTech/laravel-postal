@@ -2,9 +2,9 @@
 [![Build Status](https://travis-ci.org/SynergiTech/laravel-postal.svg?branch=master)](https://travis-ci.org/SynergiTech/laravel-postal)
 [![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
-This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 5 mail framework.
+This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel mail framework.
 
-Notice: This package only works for Laravel between versions: 5.6 and 6.x.
+Notice: This package only works for Laravel versions >= 5.6 and < 7.
 
 ## Install
 
