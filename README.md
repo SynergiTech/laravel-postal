@@ -2,9 +2,9 @@
 [![Build Status](https://travis-ci.org/SynergiTech/laravel-postal.svg?branch=master)](https://travis-ci.org/SynergiTech/laravel-postal)
 [![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
-This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel 7 mail framework.
+This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel mail framework.
 
-Notice: Need this package for Laravel between 5.8 and 6? Use version 2.
+Notice: Need this package for Laravel < 7? Use version 2.
 
 ## Install
 
@@ -27,7 +27,10 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
-Now we want to add postal as a mailer to our `config/mail.php` file
+Notice: if you're upgrading to Laravel 7, `MAIL_DRIVER` has become `MAIL_MAILER`.
+
+Finally, add postal as a mailer to your `config/mail.php` file
+
 ```
 'mailers' => [
     'postal' => [
@@ -35,7 +38,6 @@ Now we want to add postal as a mailer to our `config/mail.php` file
     ],
 ],
 ```
-> Notice: Since Laravel 7 they use a new structure of config file which needs `MAIL_MAILER`.  
 
 If you want to alter the configuration further, you can reference the `config/postal.php` file for the keys to place in your environment. Alternatively, you can publish the config file in the usual way if you wish to make specific changes:
 ```
@@ -54,6 +56,9 @@ MAIL_FROM_NAME="Your Company"
 As this is a driver for the main Laravel Mail framework, sending emails is the same as usual - just follow the Laravel Mail documentation - however we recommend you make use of the `PostalNotificationChannel` class to enable full email tracking within your software.
 
 ## Upgrading
+### Upgrading to V3
+If you are updating to Laravel 7, you will need to make use of version 3 to support the changes that have been made. Otherwise you should remain on version 2.
+
 ### Upgrading from V1 to V2
 **Please note** version 2 is backwards compatible with version 1 as long as you are not using a listener. Version 2 is also configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.
 
