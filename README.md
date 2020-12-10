@@ -2,9 +2,7 @@
 [![Build Status](https://travis-ci.org/SynergiTech/laravel-postal.svg?branch=master)](https://travis-ci.org/SynergiTech/laravel-postal)
 [![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
-This library integrates [Postal](https://github.com/atech/postal) with the standard Laravel mail framework.
-
-Notice: Need this package for Laravel < 7? Use version 2.
+This library integrates [Postal](https://github.com/postalhq/postal) with the standard Laravel mail framework.
 
 ## Install
 
@@ -27,9 +25,9 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
-Notice: if you're upgrading to Laravel 7, `MAIL_DRIVER` has become `MAIL_MAILER`.
+Notice: if you're using Laravel < 7, `MAIL_MAILER` should be `MAIL_DRIVER`.
 
-Finally, add postal as a mailer to your `config/mail.php` file
+Finally, if you're using Laravel 7 or later, add postal as a mailer to your `config/mail.php` file
 
 ```
 'mailers' => [
@@ -57,7 +55,7 @@ As this is a driver for the main Laravel Mail framework, sending emails is the s
 
 ## Upgrading
 ### Upgrading to V3
-If you are updating to Laravel 7, you will need to make use of version 3 to support the changes that have been made. Otherwise you should remain on version 2.
+If you are updating to Laravel 7 as well, you will need to update your environment variable names.
 
 ### Upgrading from V1 to V2
 **Please note** version 2 is backwards compatible with version 1 as long as you are not using a listener. Version 2 is also configured differently and includes many more features (including support for webhooks) so if you're upgrading from version 1, please take time to re-read this information.

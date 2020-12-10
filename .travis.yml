@@ -1,6 +1,7 @@
 language: php
 
 env:
+  - LARAVEL=6
   - LARAVEL=7
   - LARAVEL=8
 
