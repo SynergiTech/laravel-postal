@@ -192,7 +192,8 @@ vendor/bin/phpunit -c phpunit.xml
 You will need xdebug installed to generate code coverage.
 
 ### Docker
-A sample Dockerfile is provided to setup an environment to run the tests without configuring your local machine. The Dockerfile can take a PHP version as an argument to test multiple versions.
+A sample Dockerfile is provided to setup an environment to run the tests without configuring your local machine. The Dockerfile can test multiple combinations of versions for PHP and Laravel via arguments.
+
 ```
-docker build . --build-arg PHP_VERSION=7.3
+docker build . --build-arg PHP_VERSION=7.3 --build-arg LARAVEL=7
 ```
