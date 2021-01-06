@@ -46,6 +46,13 @@ class PostalNotificationChannel extends MailChannel
             $recipients = [$recipients];
         }
 
+        // if there are no recipients, its probable that the shorter `->notify()` form was used
+        if ($recipients === null) {
+            if (is_string($recipients = $notifiable->routeNotificationFor('postal', $notification))) {
+                $recipients = [$recipients];
+            }
+        }
+
         return collect($recipients)->mapWithKeys(function ($recipient, $email) {
             return is_numeric($email)
                     ? [$email => (is_string($recipient) ? $recipient : $recipient->email)]
