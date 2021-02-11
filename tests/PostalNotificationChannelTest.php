@@ -27,7 +27,7 @@ class PostalNotificationChannelTest extends TestCase
         $nc->send('test', $notifyMock);
     }
 
-    public function testGetRecipients()
+    public function getRecipients($form)
     {
         $mailerMock = (class_exists(\Illuminate\Mail\MailManager::class))
             ? $this->createMock(\Illuminate\Mail\MailManager::class)
@@ -46,7 +46,13 @@ class PostalNotificationChannelTest extends TestCase
 
         $notifiableMock->expects($this->exactly(count($mockResponses)))
             ->method('routeNotificationFor')
-            ->with(PostalNotificationChannel::class, $notificationMock)
+            ->with(
+                $this->logicalOr(
+                    $form,
+                    PostalNotificationChannel::class
+                ),
+                $notificationMock
+            )
             ->will($this->onConsecutiveCalls(...$mockResponses));
 
         $nc = new PostalNotificationChannel($mailerMock, $markdownMock);
@@ -61,5 +67,15 @@ class PostalNotificationChannelTest extends TestCase
         foreach ($mockResponses as $response) {
             $this->assertSame(['getRecipientsTest@example.com'], $callProtectedFunction());
         }
+    }
+
+    public function testGetRecipientsLongForm()
+    {
+        $this->getRecipients(PostalNotificationChannel::class);
+    }
+
+    public function testGetRecipientsShortForm()
+    {
+        $this->getRecipients('postal');
     }
 }
