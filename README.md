@@ -1,6 +1,5 @@
 # Laravel Postal
 ![Tests](https://github.com/SynergiTech/laravel-postal/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/SynergiTech/laravel-postal/branch/master/graph/badge.svg)](https://codecov.io/gh/SynergiTech/laravel-postal)
 
 This library integrates [Postal](https://github.com/postalhq/postal) with the standard Laravel mail framework.
 
