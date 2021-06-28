@@ -1,11 +1,4 @@
 version: 2
-registries:
-  git-github-com:
-    type: git
-    url: https://github.com
-    username: x-access-token
-    password: "${{secrets.GIT_GITHUB_COM_PASSWORD}}"
-
 updates:
 - package-ecosystem: composer
   directory: "/"
@@ -16,5 +9,3 @@ updates:
   - dependency-name: phpunit/phpunit
     versions:
     - ">= 8.a, < 9"
-  registries:
-  - git-github-com
