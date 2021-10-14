@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class PostalCreateEmailWebhookTable extends Migration
 {
@@ -13,11 +13,14 @@ class PostalCreateEmailWebhookTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('email_webhooks')) {
+        $model = config('postal.models.webhook');
+        $table = (new $model())->getTable();
+
+        if (Schema::hasTable($table)) {
             return;
         }
 
-        Schema::create('email_webhooks', function (Blueprint $table) {
+        Schema::create($table, function (Blueprint $table) {
             $table->bigIncrements('id');
 
             $table->unsignedBigInteger('email_id');
@@ -38,6 +41,9 @@ class PostalCreateEmailWebhookTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('email_webhooks');
+        $model = config('postal.models.webhook');
+        $table = (new $model())->getTable();
+
+        Schema::dropIfExists($table);
     }
 }

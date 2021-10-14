@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class PostalCreateEmailTable extends Migration
 {
@@ -13,11 +13,14 @@ class PostalCreateEmailTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('emails')) {
+        $model = config('postal.models.email');
+        $table = (new $model())->getTable();
+
+        if (Schema::hasTable($table)) {
             return;
         }
 
-        Schema::create('emails', function (Blueprint $table) {
+        Schema::create($table, function (Blueprint $table) {
             $table->bigIncrements('id');
 
             $table->string('to_name')->nullable();
@@ -54,6 +57,9 @@ class PostalCreateEmailTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('emails');
+        $model = config('postal.models.email');
+        $table = (new $model())->getTable();
+
+        Schema::dropIfExists($table);
     }
 }
