@@ -21,10 +21,13 @@ class PostalCreateEmailWebhookTable extends Migration
         }
 
         Schema::create($table, function (Blueprint $table) {
+            $emailModel = config('postal.models.email');
+            $emailTable = (new $emailModel())->getTable();
+
             $table->bigIncrements('id');
 
             $table->unsignedBigInteger('email_id');
-            $table->foreign('email_id')->references('id')->on('emails')->onDelete('cascade');
+            $table->foreign('email_id')->references('id')->on($emailTable)->onDelete('cascade');
 
             $table->string('action')->nullable();
 
