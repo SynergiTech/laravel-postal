@@ -78,7 +78,8 @@ class PostalNotificationChannel extends MailChannel
         if (method_exists($notification, 'logEmailAgainstModel')) {
             $model = $notification->logEmailAgainstModel();
             if ($model instanceof Model) {
-                $headers = $mailMessage->getSwiftMessage()->getHeaders();
+                // todo use callbacks instead?
+                $headers = $mailMessage->getSymfonyMessage()->getHeaders();
                 $headers->addTextHeader('notifiable_class', get_class($model));
                 $headers->addTextHeader('notifiable_id', $model->id);
             }

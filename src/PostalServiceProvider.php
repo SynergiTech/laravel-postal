@@ -2,9 +2,8 @@
 
 namespace SynergiTech\Postal;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Mail\TransportManager;
-use Illuminate\Mail\MailManager;
 use Postal\Client;
 
 class PostalServiceProvider extends ServiceProvider
@@ -30,33 +29,8 @@ class PostalServiceProvider extends ServiceProvider
         if (config('postal.enable.webhookreceiving') === true) {
             \Route::post(config('postal.webhook.route'), 'SynergiTech\Postal\Controllers\WebhookController@process');
         }
-    }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function register()
-    {
-        $this->app->afterResolving(TransportManager::class, function (TransportManager $manager) {
-            $this->extendTransportManager($manager);
-        });
-
-        $this->app->afterResolving(MailManager::class, function (MailManager $manager) {
-            $this->extendMailManager($manager);
-        });
-    }
-
-    public function extendTransportManager(TransportManager $manager)
-    {
-        $manager->extend('postal', function () {
-            $config = config('postal', []);
-            return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
-        });
-    }
-
-    public function extendMailManager(MailManager $manager)
-    {
-        $manager->extend('postal', function () {
+        Mail::extend('postal', function (array $config = []) {
             $config = config('postal', []);
             return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
         });

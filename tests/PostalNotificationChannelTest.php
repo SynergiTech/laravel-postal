@@ -9,9 +9,7 @@ class PostalNotificationChannelTest extends TestCase
 {
     public function testSend()
     {
-        $mailerMock = (class_exists(\Illuminate\Mail\MailManager::class))
-            ? $this->createMock(\Illuminate\Mail\MailManager::class)
-            : $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
         $notifyMock = $this->createMock(ExampleNotification::class);
 
@@ -29,9 +27,7 @@ class PostalNotificationChannelTest extends TestCase
 
     public function getRecipients($form)
     {
-        $mailerMock = (class_exists(\Illuminate\Mail\MailManager::class))
-            ? $this->createMock(\Illuminate\Mail\MailManager::class)
-            : $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
         $notificationMock = $this->createMock(ExampleNotification::class);
         $notifiableMock = $this->createMock(\Illuminate\Notifications\AnonymousNotifiable::class);
