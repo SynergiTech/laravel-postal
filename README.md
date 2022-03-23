@@ -1,4 +1,5 @@
 # Laravel Postal
+[![Latest Stable Version](https://img.shields.io/packagist/v/synergitech/laravel-postal.svg?style=flat-square)](https://packagist.org/packages/synergitech/laravel-postal)
 ![Tests](https://github.com/SynergiTech/laravel-postal/workflows/Tests/badge.svg)
 
 This library integrates [Postal](https://github.com/postalhq/postal) with the standard Laravel mail framework.
@@ -53,6 +54,9 @@ MAIL_FROM_NAME="Your Company"
 As this is a driver for the main Laravel Mail framework, sending emails is the same as usual - just follow the Laravel Mail documentation - however we recommend you make use of the `PostalNotificationChannel` class to enable full email tracking within your software.
 
 ## Upgrading
+### Upgrading to V4
+* We now throw `TransportException` when an API error occurs, instead of a `BadMethodCallException`.
+
 ### Upgrading to V3
 If you are updating to Laravel 7 as well, you will need to update your environment variable names.
 
