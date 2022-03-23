@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit backupGlobals="false"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          backupStaticAttributes="false"
          bootstrap="vendor/autoload.php"
          colors="true"
@@ -22,12 +24,12 @@
         <server name="MAIL_DRIVER" value="postal"/>
         <server name="MAIL_MAILER" value="postal"/>
     </php>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
+    <coverage processUncoveredFiles="true">
+        <include>
             <directory suffix=".php">./src</directory>
-        </whitelist>
-    </filter>
-    <logging>
-        <log type="coverage-html" target="coverage-html" />
-    </logging>
+        </include>
+        <report>
+            <html outputDirectory="coverage-html"/>
+        </report>
+    </coverage>
 </phpunit>

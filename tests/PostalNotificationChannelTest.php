@@ -9,9 +9,7 @@ class PostalNotificationChannelTest extends TestCase
 {
     public function testSend()
     {
-        $mailerMock = (class_exists(\Illuminate\Mail\MailManager::class))
-            ? $this->createMock(\Illuminate\Mail\MailManager::class)
-            : $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
         $notifyMock = $this->createMock(ExampleNotification::class);
 
@@ -27,11 +25,9 @@ class PostalNotificationChannelTest extends TestCase
         $nc->send('test', $notifyMock);
     }
 
-    public function getRecipients($form)
+    public function testGetRecipients()
     {
-        $mailerMock = (class_exists(\Illuminate\Mail\MailManager::class))
-            ? $this->createMock(\Illuminate\Mail\MailManager::class)
-            : $this->createMock(\Illuminate\Mail\Mailer::class);
+        $mailerMock = $this->createMock(\Illuminate\Mail\MailManager::class);
         $markdownMock = $this->createMock(\Illuminate\Mail\Markdown::class);
         $notificationMock = $this->createMock(ExampleNotification::class);
         $notifiableMock = $this->createMock(\Illuminate\Notifications\AnonymousNotifiable::class);
@@ -47,10 +43,7 @@ class PostalNotificationChannelTest extends TestCase
         $notifiableMock->expects($this->exactly(count($mockResponses)))
             ->method('routeNotificationFor')
             ->with(
-                $this->logicalOr(
-                    $form,
-                    PostalNotificationChannel::class
-                ),
+                PostalNotificationChannel::class,
                 $notificationMock
             )
             ->will($this->onConsecutiveCalls(...$mockResponses));
@@ -64,18 +57,9 @@ class PostalNotificationChannelTest extends TestCase
             return $method->invokeArgs($nc, [$notifiableMock, $notificationMock, null]);
         };
 
+        $this->assertCount(3, $mockResponses);
         foreach ($mockResponses as $response) {
             $this->assertSame(['getRecipientsTest@example.com'], $callProtectedFunction());
         }
-    }
-
-    public function testGetRecipientsLongForm()
-    {
-        $this->getRecipients(PostalNotificationChannel::class);
-    }
-
-    public function testGetRecipientsShortForm()
-    {
-        $this->getRecipients('postal');
     }
 }

@@ -17,4 +17,4 @@ RUN composer require laravel/framework ^$LARAVEL.0
 
 COPY . .
 
-RUN vendor/bin/phpunit -c phpunit.xml
+RUN XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
