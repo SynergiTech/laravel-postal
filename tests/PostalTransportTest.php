@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use Mockery\MockInterface;
 use Postal\Client;
 use Postal\Error;
+use Symfony\Component\Mailer\Exception\TransportException;
 use SynergiTech\Postal\PostalTransport;
 
 class PostalTransportTest extends TestCase
@@ -15,8 +16,8 @@ class PostalTransportTest extends TestCase
         // requests requires a URL
         config(['postal.domain' => 'http://example.com']);
 
-        // the transport converts Postal\Error to BadMethodCallException
-        $this->expectException(\BadMethodCallException::class);
+        // the transport converts Postal\Error to TransportException
+        $this->expectException(TransportException::class);
 
         $clientMock = $this->createMock(Client::class);
         $clientMock
