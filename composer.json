@@ -1,6 +1,6 @@
 {
     "name": "synergitech/laravel-postal",
-    "description": "This library integrates Postal with the standard Laravel 5 mail framework.",
+    "description": "This library integrates Postal with the standard Laravel mail framework.",
     "keywords": [
         "Laravel",
         "Postal",
