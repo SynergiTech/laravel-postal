@@ -73,13 +73,15 @@ In order to associate the messages with the notifiable model, you will need to r
 Here is a complete example of what you need to do to ensure your notifiable model is linked to the emails that get sent.
 
 ```php
-use Notification;
-use SynergiTech\Postal\PostalNotificationChannel;
 use App\Notifications\EnquiryNotification;
+use Illuminate\Support\Facades\Notification;
+use SynergiTech\Postal\PostalNotificationChannel;
 
-// controller code here
+// Using the Notifiable trait
+$user->notify(new EnquiryNotification($enquiry));
 
-Notification::route(PostalNotificationChannel::class, $to)
+// On demand notifications
+Notification::route(PostalNotificationChannel::class, 'john.smith@example.com')
     ->notify(new EnquiryNotification($enquiry));
 ```
 
