@@ -2,26 +2,38 @@
 
 namespace SynergiTech\Postal\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use PhpParser\Node\Expr\Instanceof_;
 
 class WebhookController extends Controller
 {
-    public function process(Request $request)
+    public function process(Request $request): Response
     {
         if ($request->input('payload') === null) {
             // todo remove link header
             return response('No payload', 400);
         }
 
-        if (config('postal.webhook.verify') === true && strlen(config('postal.webhook.public_key')) > 0) {
+        if (
+            config('postal.webhook.verify') === true
+            && is_string(config('postal.webhook.public_key'))
+            && strlen(config('postal.webhook.public_key')) > 0
+        ) {
             $rsa_key_pem = "-----BEGIN PUBLIC KEY-----\r\n" .
                 chunk_split(config('postal.webhook.public_key'), 64) .
                 "-----END PUBLIC KEY-----\r\n";
-            $rsa_key = openssl_pkey_get_public($rsa_key_pem);
+            $rsa_key = openssl_pkey_get_public($rsa_key_pem) ?: '';
 
-            $signature = base64_decode($request->header('x-postal-signature'));
+            $signature = '';
+            $encodedSignature = $request->header('x-postal-signature');
+            if (is_string($encodedSignature)) {
+                $signature = base64_decode($encodedSignature);
+            }
 
+            /** @var string $body */
             $body = $request->getContent();
 
             $result = openssl_verify($body, $signature, $rsa_key, OPENSSL_ALGO_SHA1);
