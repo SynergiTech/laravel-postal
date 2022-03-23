@@ -40,20 +40,21 @@ class PostalNotificationChannel extends MailChannel
      */
     protected function getRecipients($notifiable, $notification, $message)
     {
-        // copy from mailchannel, update channel name to this class
-        // - this is where the "to" addressee gets injected
-        if (is_string($recipients = $notifiable->routeNotificationFor(self::class, $notification))) {
-            $recipients = [$recipients];
-        }
+        $recipients = collect();
 
-        // if there are no recipients, its probable that the shorter `->notify()` form was used
-        if ($recipients === null) {
-            if (is_string($recipients = $notifiable->routeNotificationFor('postal', $notification))) {
-                $recipients = [$recipients];
+        // check if routeNotificationForPostal is defined, or default to the mail driver
+        foreach ([self::class, 'postal', 'mail'] as $driver) {
+            $driverRecipients = $notifiable->routeNotificationFor($driver, $notification);
+
+            if ($driverRecipients === null) {
+                continue;
             }
+
+            $recipients = collect($driverRecipients);
+            break;
         }
 
-        return collect($recipients)->mapWithKeys(function ($recipient, $email) {
+        return $recipients->mapWithKeys(function ($recipient, $email) {
             return is_numeric($email)
                     ? [$email => (is_string($recipient) ? $recipient : $recipient->email)]
                     : [$email => $recipient];
