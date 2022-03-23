@@ -3,6 +3,7 @@
 namespace SynergiTech\Postal\Models\Email;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use SynergiTech\Postal\Models\Email;
 
 class Webhook extends Model
@@ -11,7 +12,10 @@ class Webhook extends Model
 
     protected $table = 'email_webhooks';
 
-    public function email()
+    /**
+     * @return BelongsTo<Email, self>
+     */
+    public function email(): BelongsTo
     {
         return $this->belongsTo(Email::class);
     }

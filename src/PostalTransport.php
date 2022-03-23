@@ -2,6 +2,8 @@
 
 namespace SynergiTech\Postal;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Postal\Client;
 use Postal\Error;
 use Postal\SendMessage;
@@ -11,6 +13,7 @@ use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Message;
 use Symfony\Component\Mime\MessageConverter;
 
 class PostalTransport extends AbstractTransport
@@ -26,7 +29,9 @@ class PostalTransport extends AbstractTransport
      */
     protected function doSend(SentMessage $sentMessage): void
     {
-        $symfonyMessage = MessageConverter::toEmail($sentMessage->getOriginalMessage());
+        /** @var Message $originalMessage */
+        $originalMessage = $sentMessage->getOriginalMessage();
+        $symfonyMessage = MessageConverter::toEmail($originalMessage);
 
         $postalmessage = $this->symfonyToPostal($symfonyMessage);
 
@@ -48,8 +53,8 @@ class PostalTransport extends AbstractTransport
 
         $this->recordEmailsFromResponse($symfonyMessage, $response);
 
-        $emailable_type = $headers->get('notifiable_class')?->getValue();
-        $emailable_id = $headers->get('notifiable_id')?->getValue();
+        $emailable_type = $headers->get('notifiable_class')?->getBody();
+        $emailable_id = $headers->get('notifiable_id')?->getBody();
 
         // headers only set if using PostalNotificationChannel
         if ($emailable_type != '' && $emailable_id != '') {
@@ -137,15 +142,16 @@ class PostalTransport extends AbstractTransport
         $senderAddress = $symfonyMessage->getFrom();
         $senderAddress = reset($senderAddress);
 
-        $emailmodel = config('postal.models.email');
+        $emailModel = config('postal.models.email');
+
         foreach ($response->recipients() as $address => $message) {
-            $email = new $emailmodel;
+            $email = new $emailModel;
 
             $email->to_email = $recipients[$address]['email'];
             $email->to_name = $recipients[$address]['name'];
 
-            $email->from_email = $senderAddress->getAddress();
-            $email->from_name = $senderAddress->getName();
+            $email->from_email = $senderAddress ? $senderAddress->getAddress() : '';
+            $email->from_name = $senderAddress ? $senderAddress->getName() : '';
 
             $email->subject = $symfonyMessage->getSubject();
 
@@ -172,7 +178,7 @@ class PostalTransport extends AbstractTransport
         return $address->getAddress();
     }
 
-    private function getNewSendMessage()
+    private function getNewSendMessage(): SendMessage
     {
         return new SendMessage($this->client);
     }

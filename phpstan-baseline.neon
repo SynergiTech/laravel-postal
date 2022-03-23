@@ -1,0 +1,97 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$action\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$email_id\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$id\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$payload\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:save\\(\\)\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: src/Controllers/WebhookController.php
+
+		-
+			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Mail\\\\Factory\\:\\:send\\(\\)\\.$#"
+			count: 1
+			path: src/PostalNotificationChannel.php
+
+		-
+			message: "#^Access to an undefined property Postal\\\\SendResult\\:\\:\\$result\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$body\\.$#"
+			count: 2
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$from_email\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$from_name\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$postal_email_id\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$postal_id\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$postal_token\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$subject\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$to_email\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Access to an undefined property object\\:\\:\\$to_name\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getTable\\(\\)\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:save\\(\\)\\.$#"
+			count: 1
+			path: src/PostalTransport.php
+

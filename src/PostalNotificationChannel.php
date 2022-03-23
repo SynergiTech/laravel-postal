@@ -18,6 +18,7 @@ class PostalNotificationChannel extends MailChannel
     public function send($notifiable, Notification $notification)
     {
         // reference MailChannel
+        /** @phpstan-ignore-next-line */
         $message = $notification->toMail($notifiable);
 
         // remove the checks
@@ -40,24 +41,31 @@ class PostalNotificationChannel extends MailChannel
      */
     protected function getRecipients($notifiable, $notification, $message)
     {
-        $recipients = collect();
+        $recipients = [];
 
         // check if routeNotificationForPostal is defined, or default to the mail driver
         foreach ([self::class, 'postal', 'mail'] as $driver) {
+            /** @phpstan-ignore-next-line */
             $driverRecipients = $notifiable->routeNotificationFor($driver, $notification);
 
             if ($driverRecipients === null) {
                 continue;
             }
 
-            $recipients = collect($driverRecipients);
+            $recipients = $driverRecipients;
+            if (is_string($recipients)) {
+                $recipients = [$recipients];
+            }
+
             break;
         }
 
-        return $recipients->mapWithKeys(function ($recipient, $email) {
+        /** @var array<string|int,mixed> $recipients */
+        return collect($recipients)->mapWithKeys(function ($recipient, $email) {
             return is_numeric($email)
-                    ? [$email => (is_string($recipient) ? $recipient : $recipient->email)]
-                    : [$email => $recipient];
+                /** @phpstan-ignore-next-line */
+                ? [$email => (is_string($recipient) ? $recipient : $recipient->email)]
+                : [$email => $recipient];
         })->all();
     }
 
@@ -82,7 +90,10 @@ class PostalNotificationChannel extends MailChannel
                 // todo use callbacks instead?
                 $headers = $mailMessage->getSymfonyMessage()->getHeaders();
                 $headers->addTextHeader('notifiable_class', get_class($model));
-                $headers->addTextHeader('notifiable_id', $model->id);
+
+                /** @var string $modelKey */
+                $modelKey = $model->getKey();
+                $headers->addTextHeader('notifiable_id', $modelKey);
             }
         }
     }

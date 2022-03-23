@@ -194,5 +194,5 @@ You will need xdebug installed to generate code coverage.
 A sample Dockerfile is provided to setup an environment to run the tests without configuring your local machine. The Dockerfile can test multiple combinations of versions for PHP and Laravel via arguments.
 
 ```
-docker build . --build-arg PHP_VERSION=7.3 --build-arg LARAVEL=7
+docker build . --build-arg PHP_VERSION=8.1 --build-arg LARAVEL=9
 ```
