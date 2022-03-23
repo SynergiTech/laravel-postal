@@ -6,8 +6,10 @@ use Postal\Client;
 use Postal\Error;
 use Postal\SendMessage;
 use Postal\SendResult;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\MessageConverter;
 
@@ -31,7 +33,7 @@ class PostalTransport extends AbstractTransport
         try {
             $response = $postalmessage->send();
         } catch (Error $error) {
-            throw new \BadMethodCallException($error->getMessage(), $error->getCode(), $error);
+            throw new TransportException($error->getMessage(), $error->getCode(), $error);
         }
 
         $headers = $symfonyMessage->getHeaders();
@@ -40,22 +42,24 @@ class PostalTransport extends AbstractTransport
         // - doesn't seem we can replace Message-ID
         $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
 
-        if (config('postal.enable.emaillogging') === true) {
-            $this->recordEmailsFromResponse($symfonyMessage, $response);
+        if (config('postal.enable.emaillogging') !== true) {
+            return;
+        }
 
-            $emailable_type = $headers->get('notifiable_class')?->getValue();
-            $emailable_id = $headers->get('notifiable_id')?->getValue();
+        $this->recordEmailsFromResponse($symfonyMessage, $response);
 
-            // headers only set if using PostalNotificationChannel
-            if ($emailable_type != '' && $emailable_id != '') {
-                $emailmodel = config('postal.models.email');
-                \DB::table((new $emailmodel)->getTable())
-                    ->where('postal_email_id', $response->result->message_id)
-                    ->update([
-                        'emailable_type' => $emailable_type,
-                        'emailable_id' => $emailable_id,
-                    ]);
-            }
+        $emailable_type = $headers->get('notifiable_class')?->getValue();
+        $emailable_id = $headers->get('notifiable_id')?->getValue();
+
+        // headers only set if using PostalNotificationChannel
+        if ($emailable_type != '' && $emailable_id != '') {
+            $emailmodel = config('postal.models.email');
+            \DB::table((new $emailmodel)->getTable())
+                ->where('postal_email_id', $response->result->message_id)
+                ->update([
+                    'emailable_type' => $emailable_type,
+                    'emailable_id' => $emailable_id,
+                ]);
         }
     }
 
@@ -73,21 +77,17 @@ class PostalTransport extends AbstractTransport
                 // dedup recipients
                 if (! in_array($symfonyAddress->getAddress(), $recipients)) {
                     $recipients[] = $symfonyAddress->getAddress();
-                    $postalMessage->{$type}($symfonyAddress->getName() != null ? ($symfonyAddress->getName() . ' <' . $symfonyAddress->getAddress() . '>') : $symfonyAddress->getAddress());
+                    $postalMessage->{$type}($this->stringifyAddress($symfonyAddress));
                 }
             }
         }
 
-        if ($symfonyMessage->getFrom()) {
-            foreach ($symfonyMessage->getFrom() as $symfonyAddress) {
-                $postalMessage->from($symfonyAddress->getName() != null ? ($symfonyAddress->getName() . ' <' . $symfonyAddress->getAddress() . '>') : $symfonyAddress->getAddress());
-            }
+        foreach ($symfonyMessage->getFrom() as $symfonyAddress) {
+            $postalMessage->from($this->stringifyAddress($symfonyAddress));
         }
 
-        if ($symfonyMessage->getReplyTo()) {
-            foreach ($symfonyMessage->getReplyTo() as $symfonyAddress) {
-                $postalMessage->replyTo($symfonyAddress->getName() != null ? ($symfonyAddress->getName() . ' <' . $symfonyAddress->getAddress() . '>') : $symfonyAddress->getAddress());
-            }
+        foreach ($symfonyMessage->getReplyTo() as $symfonyAddress) {
+            $postalMessage->replyTo($this->stringifyAddress($symfonyAddress));
         }
 
         if ($symfonyMessage->getSubject()) {
@@ -104,8 +104,7 @@ class PostalTransport extends AbstractTransport
         foreach ($symfonyMessage->getAttachments() as $symfonyPart) {
             $filename = $symfonyPart
                 ->getPreparedHeaders()
-                ->get('content-disposition')
-                ->getParameters()['filename'];
+                ->getHeaderParameter('content-disposition', 'filename');
 
             $postalMessage->attach(
                 $filename,
@@ -162,6 +161,15 @@ class PostalTransport extends AbstractTransport
 
             $email->save();
         }
+    }
+
+    private function stringifyAddress(Address $address): string
+    {
+        if ($address->getName() != null) {
+            return $address->getName() . ' <' . $address->getAddress() . '>';
+        }
+
+        return $address->getAddress();
     }
 
     private function getNewSendMessage()
