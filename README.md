@@ -25,9 +25,7 @@ POSTAL_DOMAIN=https://your.postal.server
 POSTAL_KEY=yourapicredential
 ```
 
-Notice: if you're using Laravel < 7, `MAIL_MAILER` should be `MAIL_DRIVER`.
-
-Finally, if you're using Laravel 7 or later, add postal as a mailer to your `config/mail.php` file
+Finally, add postal as a mailer to your `config/mail.php` file
 
 ```
 'mailers' => [
@@ -55,7 +53,9 @@ As this is a driver for the main Laravel Mail framework, sending emails is the s
 
 ## Upgrading
 ### Upgrading to V4
-* We now throw `TransportException` when an API error occurs, instead of a `BadMethodCallException`.
+Version 4 only supports Laravel 9 and newer owing to significant changes in how Laravel processes email.
+
+We also now throw `TransportException` when an API error occurs, instead of a `BadMethodCallException`.
 
 ### Upgrading to V3
 If you are updating to Laravel 7 as well, you will need to update your environment variable names.
