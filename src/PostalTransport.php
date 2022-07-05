@@ -22,6 +22,7 @@ class PostalTransport extends AbstractTransport
         protected Client $client
     )
     {
+        parent::__construct();
     }
 
     /**
