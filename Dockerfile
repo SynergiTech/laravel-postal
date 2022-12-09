@@ -1,8 +1,7 @@
 ARG PHP_VERSION=7.3
 FROM php:$PHP_VERSION-cli-alpine
 
-RUN apk add git zip unzip autoconf make g++ bash vim
-
+RUN apk add git zip unzip autoconf make g++
 
 RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
