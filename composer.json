@@ -34,7 +34,7 @@
     "scripts": {
         "test": [
             "phpunit",
-            "phpstan"
+            "phpstan --memory-limit=1G"
         ]
     }
 }
