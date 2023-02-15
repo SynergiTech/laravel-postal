@@ -3,18 +3,22 @@ FROM php:$PHP_VERSION-cli-alpine
 
 RUN apk add git zip unzip autoconf make g++
 
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-
 RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
 
 WORKDIR /package
 
-COPY composer.json ./
+RUN adduser -D -g '' dev
+
+RUN chown dev -R /package
+
+USER dev
+
+COPY --chown=dev composer.json ./
 
 ARG LARAVEL=7
 RUN composer require laravel/framework ^$LARAVEL.0
 
-COPY . .
+COPY --chown=dev . .
 
-RUN XDEBUG_MODE=coverage composer test
+RUN composer test
