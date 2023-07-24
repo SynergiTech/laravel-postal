@@ -2,12 +2,10 @@
 
 namespace SynergiTech\Postal;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Postal\Client;
-use Postal\Error;
-use Postal\SendMessage;
-use Postal\SendResult;
+use Postal\ApiException;
+use Postal\Send\Message as SendMessage;
+use Postal\Send\Result as SendResult;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
@@ -37,8 +35,8 @@ class PostalTransport extends AbstractTransport
         $postalmessage = $this->symfonyToPostal($symfonyMessage);
 
         try {
-            $response = $postalmessage->send();
-        } catch (Error $error) {
+            $response = $this->client->send->message($postalmessage);
+        } catch (ApiException $error) {
             throw new TransportException($error->getMessage(), $error->getCode(), $error);
         }
 
@@ -46,7 +44,7 @@ class PostalTransport extends AbstractTransport
 
         // send known header back for laravel to match emails coming out of Postal
         // - doesn't seem we can replace Message-ID
-        $headers->addTextHeader('Postal-Message-ID', $response->result->message_id);
+        $headers->addTextHeader('Postal-Message-ID', $response->message_id);
 
         if (config('postal.enable.emaillogging') !== true) {
             return;
@@ -61,7 +59,7 @@ class PostalTransport extends AbstractTransport
         if ($emailable_type != '' && $emailable_id != '') {
             $emailmodel = config('postal.models.email');
             \DB::table((new $emailmodel)->getTable())
-                ->where('postal_email_id', $response->result->message_id)
+                ->where('postal_email_id', $response->message_id)
                 ->update([
                     'emailable_type' => $emailable_type,
                     'emailable_id' => $emailable_id,
@@ -107,13 +105,13 @@ class PostalTransport extends AbstractTransport
             $postalMessage->htmlBody($symfonyMessage->getHtmlBody());
         }
 
-        foreach ($symfonyMessage->getAttachments() as $symfonyPart) {
+        foreach ($symfonyMessage->getAttachments() as $index => $symfonyPart) {
             $filename = $symfonyPart
                 ->getPreparedHeaders()
                 ->getHeaderParameter('content-disposition', 'filename');
 
             $postalMessage->attach(
-                $filename,
+                $filename ?? "attached_file_$index",
                 $symfonyPart->getMediaType() . '/' . $symfonyPart->getMediaSubtype(),
                 $symfonyPart->getBody()
             );
@@ -162,9 +160,9 @@ class PostalTransport extends AbstractTransport
                 $email->body = $symfonyMessage->getHtmlBody();
             }
 
-            $email->postal_email_id = $response->result->message_id;
-            $email->postal_id = $message->id();
-            $email->postal_token = $message->token();
+            $email->postal_email_id = $response->message_id;
+            $email->postal_id = $message->id;
+            $email->postal_token = $message->token;
 
             $email->save();
         }
@@ -181,7 +179,7 @@ class PostalTransport extends AbstractTransport
 
     private function getNewSendMessage(): SendMessage
     {
-        return new SendMessage($this->client);
+        return new SendMessage();
     }
 
     /**

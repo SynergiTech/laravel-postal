@@ -13,7 +13,7 @@ class PostalNotificationChannel extends MailChannel
      *
      * @param  mixed  $notifiable
      * @param  \Illuminate\Notifications\Notification  $notification
-     * @return void
+     * @return \Illuminate\Mail\SentMessage|null
      */
     public function send($notifiable, Notification $notification)
     {

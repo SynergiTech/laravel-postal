@@ -10,6 +10,10 @@ class PostalServiceProviderTest extends TestCase
     {
         // assert the service provider did boot and extend the mail
 
+        config([
+            'postal' => ['domain' => 'example.com', 'key' => 'hunter2'],
+        ]);
+
         $driver = app('mail.manager')
             ->createSymfonyTransport(config('mail.mailers.postal'));
 

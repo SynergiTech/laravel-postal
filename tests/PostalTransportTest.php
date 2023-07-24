@@ -5,7 +5,10 @@ namespace SynergiTech\Postal\Tests;
 use Illuminate\Support\Facades\Mail;
 use Mockery\MockInterface;
 use Postal\Client;
-use Postal\Error;
+use Postal\ApiException;
+use Postal\Send\Message;
+use Postal\Send\Result;
+use Postal\SendService;
 use Symfony\Component\Mailer\Exception\TransportException;
 use SynergiTech\Postal\PostalTransport;
 
@@ -13,18 +16,18 @@ class PostalTransportTest extends TestCase
 {
     public function testSendPostalFailure(): void
     {
-        // requests requires a URL
-        config(['postal.domain' => 'http://example.com']);
-
-        // the transport converts Postal\Error to TransportException
+        // the transport converts Postal\ApiException to TransportException
         $this->expectException(TransportException::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $clientMock
-            ->method('makeRequest')
-            ->will($this->throwException(new Error()));
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $serviceMock->method('message')
+                ->will($this->throwException(new ApiException()));
+
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
@@ -33,20 +36,23 @@ class PostalTransportTest extends TestCase
 
     public function testSendSuccess(): void
     {
-        // requests requires a URL
-        config(['postal.domain' => 'http://example.com']);
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $result = new \stdClass;
-        $result->message_id = 'test';
-        $message = new \stdClass();
-        $message->id = 'first';
-        $message->token = 'first';
-        $result->messages['testsendsuccess@example.com'] = $message;
+            $result = new Result([
+                'message_id' => 'test',
+                'messages' => ['testsendsuccess@example.com' => [
+                    'id' => 123,
+                    'token' => 'first',
+                ]],
+            ]);
 
-        $clientMock->method('makeRequest')->willReturn((object)$result);
+            $serviceMock->method('message')
+                ->willReturn($result);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
@@ -64,19 +70,23 @@ class PostalTransportTest extends TestCase
 
     public function testPostalCaseSensitivity(): void
     {
-        $result = new \stdClass;
-        $result->message_id = 'caseSensitivityTest';
-        $message = new \stdClass();
-        $message->id = 'caseSensitivityTest';
-        $message->token = 'caseSensitivityTest';
-        $result->messages['caseSensitivityTest@example.com'] = $message;
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $clientMock
-            ->method('makeRequest')
-            ->willReturn($result);
+            $result = new Result([
+                'message_id' => 'caseSensitivityTest',
+                'messages' => ['caseSensitivityTest@example.com' => [
+                    'id' => 123,
+                    'token' => 'caseSensitivityTest',
+                ]],
+            ]);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $serviceMock->method('message')
+                ->willReturn($result);
+
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
@@ -93,29 +103,28 @@ class PostalTransportTest extends TestCase
 
     public function testAttachments(): void
     {
-        // requests requires a URL
-        config(['postal.domain' => 'http://example.com']);
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->mock(SendService::class);
 
-        $clientMock = $this->mock(Client::class, function (MockInterface $mock) {
-            $message = new \stdClass();
-            $message->id = 'first';
-            $message->token = 'first';
+            $result = new Result([
+                'message_id' => 'first',
+                'messages' => ['testsendsuccess@example.com' => [
+                    'id' => 123,
+                    'token' => 'first',
+                ]],
+            ]);
 
-            $result = new \stdClass;
-            $result->message_id = 'test';
-            $result->messages['testsendsuccess@example.com'] = $message;
+            $serviceMock->shouldReceive('message')
+                ->withArgs(function (Message $message) {
+                    $this->assertCount(1, $message->attachments);
 
-            $mock->shouldReceive('makeRequest')
-                ->withArgs(function ($controller, $action, $parameters) {
-                    $this->assertCount(1, $parameters['attachments']);
-                    $this->assertSame('test-attachment', $parameters['attachments'][0]['name']);
-
-                    return $controller == 'send' && $action == 'message';
+                    return $message->attachments[0]['name'] == 'test-attachment';
                 })
-                ->andReturn((object)$result);
-        });
+                ->andReturn($result);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
