@@ -31,12 +31,19 @@ class PostalServiceProvider extends ServiceProvider
         }
 
         Mail::extend('postal', function (array $config = []) {
-            $config = config('postal', []);
+            $config = config('postal');
+
             if (! is_array($config)) {
-                $config = [];
+                throw new \RuntimeException('missing Postal configuration');
+            }
+            if (! is_string($config['domain'])) {
+                throw new \RuntimeException('missing Postal domain configuration');
+            }
+            if (! is_string($config['key'])) {
+                throw new \RuntimeException('missing Postal key configuration');
             }
 
-            return new PostalTransport(new Client($config['domain'] ?? null, $config['key'] ?? null));
+            return new PostalTransport(new Client($config['domain'], $config['key']));
         });
     }
 }

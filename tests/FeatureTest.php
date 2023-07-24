@@ -5,6 +5,8 @@ namespace SynergiTech\Postal\Tests;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Postal\Client;
+use Postal\Send\Result;
+use Postal\SendService;
 use Symfony\Component\Mailer\DelayedEnvelope;
 use SynergiTech\Postal\PostalNotificationChannel;
 use SynergiTech\Postal\PostalTransport;
@@ -13,19 +15,23 @@ class FeatureTest extends TestCase
 {
     public function testSendingNotificationOnDemand()
     {
-        $result = new \stdClass;
-        $result->message_id = 'feature-test';
-        $message = new \stdClass();
-        $message->id = 'feature-test';
-        $message->token = 'feature-test';
-        $result->messages['feature-test@example.com'] = $message;
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $clientMock
-            ->method('makeRequest')
-            ->willReturn($result);
+            $result = new Result([
+                'message_id' => 'feature-test',
+                'messages' => ['feature-test@example.com' => [
+                    'id' => 123,
+                    'token' => 'feature-test',
+                ]],
+            ]);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $serviceMock->method('message')
+                ->willReturn($result);
+
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
@@ -48,19 +54,23 @@ class FeatureTest extends TestCase
 
     public function testSendingNotificationOnDemandWithAlias()
     {
-        $result = new \stdClass;
-        $result->message_id = 'feature-test';
-        $message = new \stdClass();
-        $message->id = 'feature-test';
-        $message->token = 'feature-test';
-        $result->messages['feature-test@example.com'] = $message;
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $clientMock
-            ->method('makeRequest')
-            ->willReturn($result);
+            $result = new Result([
+                'message_id' => 'feature-test',
+                'messages' => ['feature-test@example.com' => [
+                    'id' => 123,
+                    'token' => 'feature-test',
+                ]],
+            ]);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $serviceMock->method('message')
+                ->willReturn($result);
+
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
@@ -83,19 +93,23 @@ class FeatureTest extends TestCase
 
     public function testSendingNotificationWithNotifiableTrait()
     {
-        $result = new \stdClass;
-        $result->message_id = 'feature-test';
-        $message = new \stdClass();
-        $message->id = 'feature-test';
-        $message->token = 'feature-test';
-        $result->messages['feature-test@example.com'] = $message;
+        Mail::extend('postal', function (array $config = []) {
+            $clientMock = $this->createMock(Client::class);
+            $serviceMock = $this->createMock(SendService::class);
 
-        $clientMock = $this->createMock(Client::class);
-        $clientMock
-            ->method('makeRequest')
-            ->willReturn($result);
+            $result = new Result([
+                'message_id' => 'feature-test',
+                'messages' => ['feature-test@example.com' => [
+                    'id' => 123,
+                    'token' => 'feature-test',
+                ]],
+            ]);
 
-        Mail::extend('postal', function (array $config = []) use ($clientMock) {
+            $serviceMock->method('message')
+                ->willReturn($result);
+
+            $clientMock->send = $serviceMock;
+
             return new PostalTransport($clientMock);
         });
 
