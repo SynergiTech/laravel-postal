@@ -176,11 +176,9 @@ class MessageSentListener
     public function handle(MessageSent $event)
     {
         $headers = $event->message->getHeaders();
-        $postalmessageid = $headers->get('Postal-Message-ID');
-        $postalmessageid = explode(': ', $postalmessageid);
-        $postalmessageid = (count($postalmessageid) == 1) ? '' : trim($postalmessageid[1]);
+        $postalmessageid = $headers->get('postal-message-id')?->getBodyAsString();
 
-        if (strlen($postalmessageid) > 0) {
+        if ($postalmessageid) {
             // do something here
         }
     }
