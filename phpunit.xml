@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit backupGlobals="false"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-         backupStaticAttributes="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         backupStaticProperties="false"
          bootstrap="vendor/autoload.php"
          colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-        >
+>
     <testsuites>
         <testsuite name="laravel-postal tests">
             <directory suffix="Test.php">./tests/</directory>
@@ -24,12 +21,14 @@
         <server name="MAIL_DRIVER" value="postal"/>
         <server name="MAIL_MAILER" value="postal"/>
     </php>
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">./src</directory>
-        </include>
+    <!-- <coverage>
         <report>
             <html outputDirectory="coverage-html"/>
         </report>
-    </coverage>
+    </coverage> -->
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
 </phpunit>
