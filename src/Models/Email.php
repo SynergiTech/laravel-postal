@@ -10,7 +10,7 @@ class Email extends Model
     const UPDATED_AT = null;
 
     /**
-     * @return HasMany<Email\Webhook>
+     * @return HasMany<Email\Webhook, $this>
      */
     public function webhooks(): HasMany
     {
