@@ -23,7 +23,7 @@ class PostalNotificationChannel extends MailChannel
 
         // remove the checks
 
-        $this->mailer->send(
+        return $this->mailer->send(
             $this->buildView($message),
             array_merge($message->data(), $this->additionalMessageData($notification)),
             $this->messageBuilder($notifiable, $notification, $message)

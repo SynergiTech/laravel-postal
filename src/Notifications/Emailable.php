@@ -3,6 +3,7 @@
 namespace SynergiTech\Postal\Notifications;
 
 // add this to any models that require it
+// @phpstan-ignore trait.unused
 trait Emailable
 {
     /**

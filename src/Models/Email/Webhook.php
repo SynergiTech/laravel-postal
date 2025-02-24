@@ -13,7 +13,7 @@ class Webhook extends Model
     protected $table = 'email_webhooks';
 
     /**
-     * @return BelongsTo<Email, self>
+     * @return BelongsTo<Email, $this>
      */
     public function email(): BelongsTo
     {
