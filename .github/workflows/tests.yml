@@ -1,15 +1,20 @@
 name: Tests
 
-on: [push]
+on:
+  - push
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
-        laravel: [11, 12]
+        laravel: [11, 12, 13]
         php: [8.2, 8.3, 8.4, 8.5]
+        exclude:
+          - laravel: '13'
+            php: 8.2
 
     steps:
       - uses: actions/checkout@v5
