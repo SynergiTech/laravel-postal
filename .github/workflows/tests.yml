@@ -8,11 +8,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        laravel: [11, 12]
+        laravel: [11, 12, 13]
         php: [8.2, 8.3, 8.4, 8.5]
+        exclude:
+          - laravel: 13
+            php: 8.2
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: test against Laravel ${{ matrix.laravel }} on PHP ${{ matrix.php }}
         run: docker build . --build-arg PHP_VERSION=${{ matrix.php }} --build-arg LARAVEL=${{ matrix.laravel }}
